@@ -238,7 +238,8 @@
         ruby: 0,
         sapphire: 0,
         emerald: 0,
-        inventory: [] // 간략화
+        inventory: [], // 간략화
+        skills: [gameSkills.basicAttack.id]
     };
 
     let selectedJob = null;
@@ -313,6 +314,7 @@
     let currentMonster = null; // 현재 전투 중인 몬스터
     let battleLogEntries = []; // 전투 로그
     let playerPotions = 3; // 물약 개수
+    let battleZoneKey = ''; // 현재 전투 중인 사냥터의 키
 
     function initBattle() {
         // 전투 시작 전 초기화
@@ -324,6 +326,7 @@
     function startBattle(zoneKey) {
         showScreen('battleScreen');
         initBattle(); // 전투 관련 변수 초기화
+        battleZoneKey = zoneKey; // 현재 전투 중인 사냥터 키 저장
 
         const zone = huntingZones[zoneKey];
         let monsterData;
@@ -396,7 +399,21 @@
             player.exp += currentMonster.exp;
             player.gold += currentMonster.gold;
             addLog(`획득: ${currentMonster.exp} EXP, ${currentMonster.gold} 골드`, 'item-drop');
-            // 아이템 및 스킬북 드랍 로직 (TODO: 다음 단계에서 구현)
+            
+            // 스킬북 드랍 로직
+            const currentZone = huntingZones[battleZoneKey]; // 전투 시작 시 저장된 zoneKey 활용 (TODO: startBattle에서 battleZoneKey 저장 필요)
+            if (currentZone && currentZone.skillDropRate && Math.random() < currentZone.skillDropRate) {
+                const potentialSkills = currentZone.potentialSkills;
+                if (potentialSkills && potentialSkills.length > 0) {
+                    const droppedSkillId = potentialSkills[Math.floor(Math.random() * potentialSkills.length)];
+                    if (!player.skills.includes(droppedSkillId)) {
+                        player.skills.push(droppedSkillId);
+                        addLog(`✨ 새로운 스킬북 [${gameSkills[droppedSkillId].name}]을 획득했습니다!`, 'legend');
+                    } else {
+                        addLog(`이미 [${gameSkills[droppedSkillId].name}] 스킬을 알고 있습니다.`, 'normal');
+                    }
+                }
+            }
         } else if (outcome === 'lose') {
             addLog('💀 전투에서 패배했습니다...', 'legend');
             battlePlayer.hp = 0; // HP 0으로 표시
@@ -439,6 +456,7 @@
     }
 
     function openSkillMenu() {
+        renderSkillMenu(); // 스킬 메뉴 렌더링
         document.getElementById('skillMenu').style.display = 'block';
     }
 
@@ -446,18 +464,83 @@
         document.getElementById('skillMenu').style.display = 'none';
     }
 
+    function renderSkillMenu() {
+        const skillMenuDiv = document.getElementById('skillMenu');
+        skillMenuDiv.innerHTML = ''; // 기존 스킬 버튼 삭제
+
+        // 닫기 버튼 먼저 추가
+        const closeButton = document.createElement('button');
+        closeButton.classList.add('game-btn');
+        closeButton.innerText = '닫기';
+        closeButton.onclick = () => closeSkillMenu();
+        skillMenuDiv.appendChild(closeButton);
+
+        player.skills.forEach(skillId => {
+            const skill = gameSkills[skillId];
+            if (skill) {
+                const skillButton = document.createElement('button');
+                skillButton.classList.add('game-btn');
+                skillButton.innerText = `${skill.name} (MP: ${skill.mpCost})`;
+                skillButton.title = skill.description; // 툴팁
+                skillButton.onclick = () => useSkill(skill.id);
+                skillMenuDiv.appendChild(skillButton);
+            }
+        });
+    }
+
+
     function useSkill(skillId) {
-        // TODO: 스킬 구현 (MP 소모, 쿨타임, 데미지 등)
-        addLog(`'${skillId}' 스킬 사용! (TODO: 구현 필요)`, 'rare');
+        const skill = gameSkills[skillId];
+        if (!skill) {
+            addLog('❌ 알 수 없는 스킬입니다.', 'rare');
+            closeSkillMenu();
+            return;
+        }
+
+        if (battlePlayer.mp < skill.mpCost) {
+            addLog('❌ MP가 부족합니다!', 'rare');
+            closeSkillMenu();
+            return;
+        }
+
+        battlePlayer.mp -= skill.mpCost;
+        addLog(`플레이어가 [${skill.name}] 스킬을 사용했습니다! (MP ${skill.mpCost} 소모)`, 'rare');
+
+        let playerDamage = 0;
+        if (skill.type === 'attack') {
+            playerDamage = Math.max(1, (battlePlayer.atk * skill.damageMultiplier) - currentMonster.def);
+            if (skill.multiHit) { // 연사 같은 다중 공격 스킬
+                let totalDamage = 0;
+                for (let i = 0; i < skill.multiHit; i++) {
+                    totalDamage += Math.max(1, (battlePlayer.atk * skill.damageMultiplier * 0.5) - currentMonster.def); // 다중 공격은 개별 데미지 감소
+                }
+                playerDamage = totalDamage;
+                addLog(`[${skill.name}] ${skill.multiHit}연속 공격! 총 ${Math.floor(playerDamage)} 데미지!`, 'rare');
+            }
+            currentMonster.hp -= playerDamage;
+            addLog(`${currentMonster.name}에게 ${Math.floor(playerDamage)}의 데미지를 입혔습니다! (남은 HP: ${Math.floor(currentMonster.hp)})`, 'normal');
+        } else if (skill.type === 'magic') {
+            playerDamage = Math.max(1, (battlePlayer.int * skill.damageMultiplier) - currentMonster.def); // 마법 데미지는 지능 기반
+            currentMonster.hp -= playerDamage;
+            addLog(`${currentMonster.name}에게 ${Math.floor(playerDamage)}의 마법 데미지를 입혔습니다! (남은 HP: ${Math.floor(currentMonster.hp)})`, 'normal');
+        } else if (skill.type === 'heal') {
+            battlePlayer.hp = Math.min(battlePlayer.maxHp, battlePlayer.hp + skill.healAmount);
+            addLog(`[${skill.name}] 스킬로 HP를 ${skill.healAmount} 회복했습니다! (남은 HP: ${Math.floor(battlePlayer.hp)})`, 'item-drop');
+        }
+        
         closeSkillMenu();
-        // 몬스터 턴으로 넘어가거나, 바로 공격 로직 실행 등
-        // 현재는 바로 몬스터 턴으로 넘어가는 방식으로
-        // performAttack()을 호출하여 몬스터 턴을 강제로 진행할 수 있지만, 스킬만의 효과를 줘야 함.
-        // 임시로 바로 몬스터 턴으로 넘어가는 로직 추가 (추후 상세화)
+
+        if (currentMonster.hp <= 0) {
+            currentMonster.hp = 0;
+            updateBattleUI();
+            endBattle('win');
+            return;
+        }
+
         // 몬스터 반격 로직
         let monsterDamage = Math.max(1, currentMonster.atk - battlePlayer.def);
         battlePlayer.hp -= monsterDamage;
-        addLog(`${currentMonster.name}에게 ${monsterDamage}의 데미지를 입었습니다! (남은 HP: ${Math.floor(battlePlayer.hp)})`, 'normal');
+        addLog(`${currentMonster.name}에게 ${Math.floor(monsterDamage)}의 데미지를 입었습니다! (남은 HP: ${Math.floor(battlePlayer.hp)})`, 'normal');
 
         if (battlePlayer.hp <= 0) {
             battlePlayer.hp = 0;
@@ -665,20 +748,39 @@
         event.preventDefault(); // 기본 스크롤 동작 방지
     }
 
+    // ---------- 스킬 정의 ----------
+    const gameSkills = {
+        // 일반 공격 스킬 (기본)
+        basicAttack: { id: 'basicAttack', name: '기본 공격', mpCost: 0, damageMultiplier: 1.0, type: 'attack', description: '기본적인 공격' },
+        // 전사 계열 스킬
+        slash: { id: 'slash', name: '베기', mpCost: 10, damageMultiplier: 1.5, type: 'attack', description: '칼로 적을 강하게 베어버립니다.' },
+        heavyStrike: { id: 'heavyStrike', name: '강타', mpCost: 15, damageMultiplier: 2.0, type: 'attack', description: '강력한 일격으로 적에게 큰 피해를 줍니다.' },
+        // 마법사 계열 스킬
+        fireball: { id: 'fireball', name: '파이어볼', mpCost: 20, damageMultiplier: 1.8, type: 'magic', description: '불덩이를 던져 적에게 마법 피해를 입힙니다.' },
+        iceLance: { id: 'iceLance', name: '아이스 랜스', mpCost: 25, damageMultiplier: 2.2, type: 'magic', description: '얼음 창을 소환하여 적을 꿰뚫습니다.' },
+        heal: { id: 'heal', name: '치유', mpCost: 15, healAmount: 50, type: 'heal', description: '자신의 체력을 회복합니다.' },
+        // 궁수 계열 스킬
+        arrowShot: { id: 'arrowShot', name: '화살 쏘기', mpCost: 5, damageMultiplier: 1.2, type: 'attack', description: '정확하게 화살을 쏴 적을 공격합니다.' },
+        multiShot: { id: 'multiShot', name: '연사', mpCost: 10, damageMultiplier: 1.0, multiHit: 3, type: 'attack', description: '여러 발의 화살을 동시에 발사합니다.' }
+    };
     // ---------- 사냥터 정의 ----------
     const huntingZones = {
         beginner: { name: '초보사냥터', minLv:1, maxLv:10, 
             monsters: ['코볼트', '늑대', '거미', '코볼트 도둑', '거대 거미', '늑대우두머리', '코볼트 주술사', '늑대 암컷', '거미 독사', '코볼트 전사'],
             dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0, legend:0 },
             goldBase: 30, expBase: 25,
-            items: ['늑대가죽', '코볼트가죽', '거미등껍질', '날카로운 이빨', '거미눈']
+            items: ['늑대가죽', '코볼트가죽', '거미등껍질', '날카로운 이빨', '거미눈'],
+            skillDropRate: 0.05, // 5% 확률로 스킬북 드랍
+            potentialSkills: ['slash', 'arrowShot'] // 초보 사냥터에서 드랍될 수 있는 스킬
         },
         skeleton: { name: '해골 던전', minLv:10, maxLv:30,
             monsters: ['해골 병사', '해골 궁수', '해골 법사', '해골 기사', '망나니 해골', '해골 골렘', '해골 거수', '해골 사제', '해골 학살자', '해골 대장'],
             dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0.1, legend:0 },
             goldBase: 80, expBase: 70,
             items: ['루비', '사파이어', '에메랄드', '해골가루', '마른뼈'],
-            gemDrop: 0.3
+            gemDrop: 0.3,
+            skillDropRate: 0.10, // 10% 확률로 스킬북 드랍
+            potentialSkills: ['slash', 'fireball', 'arrowShot', 'heavyStrike'] // 해골 던전에서 드랍될 수 있는 스킬
         },
         griffin: { name: '그리핀의 협곡', minLv:30, maxLv:50,
             monsters: ['감염된 오크', '감염된 오크전사', '감염된 오크 궁수', '리자드맨', '리자드맨 전사', '리자드맨 창술사', '리자드맨 궁수', '크로커다일', '돌골렘', '머맨', '혈거인간', '아이스골렘', '라이칸스로프', '도플갱어', '라미아', '버그베어', '켈베로스'],
@@ -686,7 +788,8 @@
             goldBase: 200, expBase: 180,
             items: ['루비', '사파이어', '에메랄드', '두꺼운 가죽', '단단한 껍데기'],
             gemDrop: 0.3,
-            boss: { name: '그리핀', level:60, hp:2000, atk:80, def:30, exp:2000, gold:800, legendDrop: true }
+            skillDropRate: 0.15, // 15% 확률로 스킬북 드랍
+            potentialSkills: ['heavyStrike', 'fireball', 'multiShot', 'heal'] // 그리핀의 협곡에서 드랍될 수 있는 스킬
         },
         oblivion: { name: '망각의 흑요 평원', minLv:50, maxLv:70,
             monsters: ['흑안의 망령', '타락한 수도사', '흑요 늑대', '심연의 박쥐', '망각의 기사', '저주받은 나무정령', '영혼 수확자', '그림자 암살자', '흑마법 실험체', '공허의 사제', '심연의 감시자'],
@@ -694,7 +797,8 @@
             goldBase: 350, expBase: 320,
             items: ['어둠의 파편', '저주받은 수정', '검은 털가죽', '영혼의 잔흔', '어둠의 혈액', '흑마력 두루마리'],
             gemDrop: 0.3,
-            boss: { name: '피의 군주 바르칸', level:70, hp:3500, atk:120, def:50, exp:3500, gold:1500, legendDrop: true }
+            skillDropRate: 0.20, // 20% 확률로 스킬북 드랍
+            potentialSkills: ['heavyStrike', 'iceLance', 'multiShot', 'heal'] // 망각의 흑요 평원에서 드랍될 수 있는 스킬
         },
         dragon: { name: '용골의 재앙지', minLv:70, maxLv:90,
             monsters: ['용혈 도마뱀', '붉은 비늘 와이번', '번개각 랩터', '용언 수호병', '불꽃의 정령룡', '폭풍의 하피', '용골 거수', '잿빛 드레이크', '용언 마도사', '천공의 감시자', '고대 청동 드래곤'],
@@ -702,7 +806,8 @@
             goldBase: 600, expBase: 550,
             items: ['용혈 결정', '붉은 비늘', '용린 조각', '번개석', '용골 파편', '고대 용핵'],
             gemDrop: 0.3,
-            boss: { name: '화염폭군 이그나르', level:90, hp:6000, atk:200, def:80, exp:6000, gold:3000, legendDrop: true }
+            skillDropRate: 0.25, // 25% 확률로 스킬북 드랍
+            potentialSkills: ['iceLance', 'heal', 'heavyStrike', 'multiShot'] // 용골의 재앙지에서 드랍될 수 있는 스킬
         },
         abyss: { name: '마계 심연 아르카디움', minLv:90, maxLv:99,
             monsters: ['마계 돌격병', '타락한 마검사', '공허의 사냥개', '심연의 마도병', '저주 인큐버스', '지옥 화염수', '심연 집행자', '마왕의 전령', '공허 파수꾼', '타락한 대천사', '심연의 군단장'],
@@ -710,7 +815,8 @@
             goldBase: 1000, expBase: 900,
             items: ['심연의 루비', '마왕의 에메랄드', '공허의 사파이어', '타락한 다이아', '군주의 흑보석', '마계 철검'],
             gemDrop: 0.5,
-            boss: { name: '마계군주 벨카르', level:99, hp:10000, atk:350, def:150, exp:10000, gold:5000, legendDrop: true }
+            skillDropRate: 0.30, // 30% 확률로 스킬북 드랍
+            potentialSkills: ['iceLance', 'heal', 'heavyStrike', 'multiShot'] // 마계 심연 아르카디움에서 드랍될 수 있는 스킬
         }
     };
 
