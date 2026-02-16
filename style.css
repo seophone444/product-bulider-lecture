@@ -1,36 +1,365 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-gradient-start: #667eea;
+    --bg-gradient-end: #764ba2;
+    --card-bg: white;
+    --text-color-primary: #333;
+    --text-color-secondary: #666;
+    --border-color: #f0f0f0;
+    --info-item-bg: #f8f9fa;
+    --fortune-gradient-start: #f093fb;
+    --fortune-gradient-end: #f5576c;
+    --fortune-text-color: white;
+    --hobby-tag-bg: #f0f0f0;
+    --hobby-tag-color: #555;
+    --quote-box-bg: #f8f9fa;
+    --contact-link-bg: #f0f0f0;
+    --contact-link-color: #555;
+    --footer-color: #999;
+}
+
+body.dark-mode {
+    --bg-gradient-start: #2c3e50;
+    --bg-gradient-end: #34495e;
+    --card-bg: #3b4252;
+    --text-color-primary: #eceff4;
+    --text-color-secondary: #d8dee9;
+    --border-color: #4c566a;
+    --info-item-bg: #434c5e;
+    --fortune-gradient-start: #5e3a51;
+    --fortune-gradient-end: #a3404f;
+    --fortune-text-color: #eceff4;
+    --hobby-tag-bg: #4c566a;
+    --hobby-tag-color: #d8dee9;
+    --quote-box-bg: #434c5e;
+    --contact-link-bg: #4c566a;
+    --contact-link-color: #d8dee9;
+    --footer-color: #d8dee9;
+}
 
 body {
-    font-family: sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #f0f0f0;
+    padding: 20px;
+    color: var(--text-color-primary); /* Default text color */
 }
 
-.container {
+.card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-header {
     text-align: center;
+    margin-bottom: 30px;
 }
 
-.generator {
+.profile-img {
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    color: var(--fortune-text-color); /* Use fortune-text-color for white contrast */
+    border: 5px solid var(--card-bg);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1 {
+    font-size: 32px;
+    color: var(--text-color-primary);
+    margin-bottom: 10px;
+}
+
+.badge {
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--fortune-text-color);
+    padding: 8px 20px;
+    border-radius: 50px;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.info-item {
+    background: var(--info-item-bg);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateY(-5px);
+}
+
+.info-icon {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.info-label {
+    color: var(--text-color-secondary);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    color: var(--text-color-primary);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.section-title {
+    font-size: 20px;
+    color: var(--text-color-primary);
+    margin: 30px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--border-color);
+}
+
+/* 운세 섹션 스타일 */
+.fortune-section {
+    background: linear-gradient(135deg, var(--fortune-gradient-start) 0%, var(--fortune-gradient-end) 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+    color: var(--fortune-text-color);
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.fortune-title {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.fortune-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.fortune-box {
+    background: rgba(255,255,255,0.2); /* Fixed alpha for overlay effect */
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.fortune-emoji {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.fortune-text {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.fortune-detail {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+.fortune-number {
+    font-size: 20px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.fortune-button {
+    background: var(--fortune-text-color); /* White in light, light text in dark */
+    color: var(--fortune-gradient-end); /* Red in light, dark text in dark */
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     margin-top: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
 }
 
-.numbers {
+.fortune-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.fortune-button:active {
+    transform: scale(0.95);
+}
+
+.hobby-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.hobby-tag {
+    background: var(--hobby-tag-bg);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    color: var(--hobby-tag-color);
+    transition: all 0.3s ease;
+}
+
+.hobby-tag:hover {
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--fortune-text-color);
+}
+
+.quote-box {
+    background: var(--quote-box-bg);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 30px 0;
+    font-style: italic;
+    position: relative;
+    color: var(--text-color-secondary); /* Ensure text color is readable */
+}
+
+.quote-box::before {
+    content: '"';
+    font-size: 60px;
+    color: var(--bg-gradient-start); /* Use a dynamic color */
+    opacity: 0.3;
+    position: absolute;
+    top: -10px;
+    left: 10px;
+}
+
+.quote-box p {
+    color: var(--text-color-secondary);
+    line-height: 1.6;
+    margin-left: 30px;
+}
+
+.contact-links {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    gap: 20px;
+    margin-top: 30px;
 }
 
-.number {
+.contact-link {
     width: 50px;
     height: 50px;
+    background: var(--contact-link-bg);
     border-radius: 50%;
-    background-color: #fff;
-    border: 2px solid #ccc;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--contact-link-color);
     font-size: 20px;
-    margin: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.contact-link:hover {
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--fortune-text-color);
+    transform: scale(1.1);
+}
+
+.age-calculator {
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--fortune-text-color);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.age-calculator h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.age-number {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 20px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.theme-toggle-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    color: var(--text-color-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.theme-toggle-button:hover {
+    transform: scale(1.1);
 }
