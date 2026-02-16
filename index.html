@@ -5,3 +5,375 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚔️ 마법의 탑 RPG - 레벨 1~99</title>
     <link rel="stylesheet" href="style.css">
+
+</style>
+</head>
+<body>
+<div class="game-container" id="gameContainer">
+<!-- 상단 상태창 -->
+<div class="status-bar" id="statusBar">
+    <div class="stat-item"><span class="stat-icon">⚔️</span> Lv.<span id="level">1</span></div>
+    <div class="stat-item"><span class="stat-icon">❤️</span> HP <span id="hp">100</span>/<span id="maxHp">100</span></div>
+    <div class="stat-item"><span class="stat-icon">💙</span> MP <span id="mp">50</span>/<span id="maxMp">50</span></div>
+    <div class="stat-item"><span class="stat-icon">✨</span> EXP <span id="exp">0</span>/<span id="maxExp">100</span></div>
+    <div class="stat-item"><span class="stat-icon">💰</span> 골드 <span id="gold">500</span></div>
+    <div class="stat-item recommend-hunt"><span class="stat-icon">🏕️</span> 추천: <span id="recommendZone">초보사냥터</span></div>
+</div>
+
+<!-- 메인 패널 -->
+<div class="main-panel">
+    <div class="character-panel">
+        <div class="char-name" id="charName">🧙 모험가</div>
+        <div class="stats-grid" id="statsDetail">
+            <div class="stat-row">💪 힘: <span id="statStr">10</span></div>
+            <div class="stat-row">🏹 민첩: <span id="statDex">10</span></div>
+            <div class="stat-row">🧠 지능: <span id="statInt">10</span></div>
+            <div class="stat-row">💪 체력: <span id="statCon">10</span></div>
+            <div class="stat-row">⚔️ 공격력: <span id="atk">15</span></div>
+            <div class="stat-row">🛡️ 방어력: <span id="def">5</span></div>
+        </div>
+        <div style="margin-top:25px;">
+            <div>❤️ HP <span id="hpBarText">100/100</span></div>
+            <div class="progress"><div class="progress-fill hp-fill" id="hpBar" style="width:100%">100%</div></div>
+            <div>💙 MP <span id="mpBarText">50/50</span></div>
+            <div class="progress"><div class="progress-fill mp-fill" id="mpBar" style="width:100%">100%</div></div>
+            <div>✨ 경험치</div>
+            <div class="progress"><div class="progress-fill exp-fill" id="expBar" style="width:0%">0%</div></div>
+        </div>
+        <!-- 전직 UI (레벨5때 활성화) -->
+        <div id="jobChangeArea" style="display:none; margin-top:20px;">
+            <div style="color:gold; font-size:1.5rem;">✨ 전직 가능! ✨</div>
+            <div class="job-select" id="jobList">
+                <div class="job-btn" onclick="selectJob('검사')">⚔️ 검사</div>
+                <div class="job-btn" onclick="selectJob('전사')">🛡️ 전사</div>
+                <div class="job-btn" onclick="selectJob('궁수')">🏹 궁수</div>
+                <div class="job-btn" onclick="selectJob('마법사')">🔮 마법사</div>
+                <div class="job-btn" onclick="selectJob('마검사')">⚡ 마검사</div>
+                <div class="job-btn" onclick="selectJob('무도가')">👊 무도가</div>
+                <div class="job-btn" onclick="selectJob('도적')">🗡️ 도적</div>
+            </div>
+            <button class="game-btn" style="padding:10px;" onclick="doJobChange()">[전직 완료]</button>
+        </div>
+    </div>
+
+    <!-- 버튼 패널 -->
+    <div class="button-panel">
+        <button class="game-btn" onclick="goInn()"><span class="stat-icon">🏨</span> 여관 (휴식)</button>
+        <button class="game-btn" onclick="openShop()"><span class="stat-icon">🏪</span> 상점</button>
+        <button class="game-btn" onclick="startHunting('normal')"><span class="stat-icon">🌲</span> 사냥터</button>
+        <button class="game-btn boss-btn" onclick="startHunting('boss')"><span class="stat-icon">👾</span> 보스사냥터</button>
+        <button class="game-btn" onclick="openEnhance()"><span class="stat-icon">⚒️</span> 장비 강화</button>
+    </div>
+</div>
+
+<!-- 강화 패널 (숨김) -->
+<div id="enhancePanel" class="enhance-panel">
+    <h3 style="color:gold;">💎 보석 강화</h3>
+    <p>보유: 루비 <span id="rubyCount">0</span> | 사파이어 <span id="sapphireCount">0</span> | 에메랄드 <span id="emeraldCount">0</span></p>
+    <button class="gem-btn" onclick="enhanceItem('ruby')">🔥 루비 강화 (공격력 +2)</button>
+    <button class="gem-btn" onclick="enhanceItem('sapphire')">💧 사파이어 강화 (방어력 +2)</button>
+    <button class="gem-btn" onclick="enhanceItem('emerald')">🍃 에메랄드 강화 (최대HP +20)</button>
+    <p style="color:#aaa;">※ 장비 강화는 영구 스탯 상승</p>
+</div>
+
+<!-- 전투/드랍 로그 -->
+<div class="log-panel" id="logPanel">
+    <div class="log-entry">🌟 마법의 탑 RPG에 오신 것을 환영합니다! 레벨 5에 전직하세요.</div>
+</div>
+</div>
+
+<script>
+// ---------- 플레이어 상태 ----------
+let player = {
+    level: 1,
+    hp: 100,
+    maxHp: 100,
+    mp: 50,
+    maxMp: 50,
+    exp: 0,
+    maxExp: 100,
+    gold: 500,
+    job: '모험가',
+    str: 10,
+    dex: 10,
+    int: 10,
+    con: 10,
+    atk: 15,
+    def: 5,
+    ruby: 0,
+    sapphire: 0,
+    emerald: 0,
+    inventory: [] // 간략화
+};
+
+let selectedJob = null;
+let logEntries = [];
+
+// ---------- 사냥터 정의 ----------
+const huntingZones = {
+    beginner: { name: '초보사냥터', minLv:1, maxLv:10, 
+        monsters: ['코볼트', '늑대', '거미', '코볼트 도둑', '거대 거미', '늑대우두머리', '코볼트 주술사', '늑대 암컷', '거미 독사', '코볼트 전사'],
+        dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0, legend:0 },
+        goldBase: 30, expBase: 25,
+        items: ['늑대가죽', '코볼트가죽', '거미등껍질', '날카로운 이빨', '거미눈']
+    },
+    skeleton: { name: '해골 던전', minLv:10, maxLv:30,
+        monsters: ['해골 병사', '해골 궁수', '해골 법사', '해골 기사', '망나니 해골', '해골 골렘', '해골 거수', '해골 사제', '해골 학살자', '해골 대장'],
+        dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0.1, legend:0 },
+        goldBase: 80, expBase: 70,
+        items: ['루비', '사파이어', '에메랄드', '해골가루', '마른뼈'],
+        gemDrop: 0.3
+    },
+    griffin: { name: '그리핀의 협곡', minLv:30, maxLv:50,
+        monsters: ['감염된 오크', '감염된 오크전사', '감염된 오크 궁수', '리자드맨', '리자드맨 전사', '리자드맨 창술사', '리자드맨 궁수', '크로커다일', '돌골렘', '머맨', '혈거인간', '아이스골렘', '라이칸스로프', '도플갱어', '라미아', '버그베어', '켈베로스'],
+        dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0.1, legend:0.04 },
+        goldBase: 200, expBase: 180,
+        items: ['루비', '사파이어', '에메랄드', '두꺼운 가죽', '단단한 껍데기'],
+        gemDrop: 0.3,
+        boss: { name: '그리핀', level:60, hp:2000, atk:80, def:30, exp:2000, gold:800, legendDrop: true }
+    },
+    oblivion: { name: '망각의 흑요 평원', minLv:50, maxLv:70,
+        monsters: ['흑안의 망령', '타락한 수도사', '흑요 늑대', '심연의 박쥐', '망각의 기사', '저주받은 나무정령', '영혼 수확자', '그림자 암살자', '흑마법 실험체', '공허의 사제', '심연의 감시자'],
+        dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0.1, legend:0.04 },
+        goldBase: 350, expBase: 320,
+        items: ['어둠의 파편', '저주받은 수정', '검은 털가죽', '영혼의 잔흔', '어둠의 혈액', '흑마력 두루마리'],
+        gemDrop: 0.3,
+        boss: { name: '피의 군주 바르칸', level:70, hp:3500, atk:120, def:50, exp:3500, gold:1500, legendDrop: true }
+    },
+    dragon: { name: '용골의 재앙지', minLv:70, maxLv:90,
+        monsters: ['용혈 도마뱀', '붉은 비늘 와이번', '번개각 랩터', '용언 수호병', '불꽃의 정령룡', '폭풍의 하피', '용골 거수', '잿빛 드레이크', '용언 마도사', '천공의 감시자', '고대 청동 드래곤'],
+        dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0.1, legend:0.04 },
+        goldBase: 600, expBase: 550,
+        items: ['용혈 결정', '붉은 비늘', '용린 조각', '번개석', '용골 파편', '고대 용핵'],
+        gemDrop: 0.3,
+        boss: { name: '화염폭군 이그나르', level:90, hp:6000, atk:200, def:80, exp:6000, gold:3000, legendDrop: true }
+    },
+    abyss: { name: '마계 심연 아르카디움', minLv:90, maxLv:99,
+        monsters: ['마계 돌격병', '타락한 마검사', '공허의 사냥개', '심연의 마도병', '저주 인큐버스', '지옥 화염수', '심연 집행자', '마왕의 전령', '공허 파수꾼', '타락한 대천사', '심연의 군단장'],
+        dropRate: { normal:0.3, magic:0.2, rare:0.15, unique:0.1, legend:0.04 },
+        goldBase: 1000, expBase: 900,
+        items: ['심연의 루비', '마왕의 에메랄드', '공허의 사파이어', '타락한 다이아', '군주의 흑보석', '마계 철검'],
+        gemDrop: 0.5,
+        boss: { name: '마계군주 벨카르', level:99, hp:10000, atk:350, def:150, exp:10000, gold:5000, legendDrop: true }
+    }
+};
+
+// ---------- 유틸리티 ----------
+function addLog(msg, type='normal') {
+    logEntries.unshift(msg);
+    if(logEntries.length > 30) logEntries.pop();
+    renderLog();
+}
+function renderLog() {
+    const panel = document.getElementById('logPanel');
+    panel.innerHTML = logEntries.map(m => `<div class="log-entry">${m}</div>`).join('');
+}
+function updateUI() {
+    document.getElementById('level').innerText = player.level;
+    document.getElementById('hp').innerText = player.hp;
+    document.getElementById('maxHp').innerText = player.maxHp;
+    document.getElementById('mp').innerText = player.mp;
+    document.getElementById('maxMp').innerText = player.maxMp;
+    document.getElementById('exp').innerText = player.exp;
+    document.getElementById('maxExp').innerText = player.maxExp;
+    document.getElementById('gold').innerText = player.gold;
+    document.getElementById('statStr').innerText = player.str;
+    document.getElementById('statDex').innerText = player.dex;
+    document.getElementById('statInt').innerText = player.int;
+    document.getElementById('statCon').innerText = player.con;
+    document.getElementById('atk').innerText = player.atk;
+    document.getElementById('def').innerText = player.def;
+    
+    // 바
+    let hpPercent = (player.hp/player.maxHp)*100;
+    let mpPercent = (player.mp/player.maxMp)*100;
+    let expPercent = (player.exp/player.maxExp)*100;
+    document.getElementById('hpBar').style.width = hpPercent+'%';
+    document.getElementById('hpBar').innerText = Math.floor(hpPercent)+'%';
+    document.getElementById('mpBar').style.width = mpPercent+'%';
+    document.getElementById('mpBar').innerText = Math.floor(mpPercent)+'%';
+    document.getElementById('expBar').style.width = expPercent+'%';
+    document.getElementById('expBar').innerText = Math.floor(expPercent)+'%';
+    document.getElementById('hpBarText').innerText = player.hp+'/'+player.maxHp;
+    document.getElementById('mpBarText').innerText = player.mp+'/'+player.maxMp;
+
+    // 추천 사냥터
+    let rec = '초보사냥터';
+    if(player.level >= 90) rec = '마계 심연';
+    else if(player.level >= 70) rec = '용골의 재앙지';
+    else if(player.level >= 50) rec = '망각의 흑요 평원';
+    else if(player.level >= 30) rec = '그리핀의 협곡';
+    else if(player.level >= 10) rec = '해골 던전';
+    document.getElementById('recommendZone').innerText = rec;
+
+    // 전직 가능
+    if(player.level >=5 && player.job === '모험가') {
+        document.getElementById('jobChangeArea').style.display = 'block';
+    } else {
+        document.getElementById('jobChangeArea').style.display = 'none';
+    }
+
+    // 보석 수
+    document.getElementById('rubyCount').innerText = player.ruby;
+    document.getElementById('sapphireCount').innerText = player.sapphire;
+    document.getElementById('emeraldCount').innerText = player.emerald;
+}
+
+// ---------- 전직 ----------
+function selectJob(job) {
+    selectedJob = job;
+    document.querySelectorAll('.job-btn').forEach(el => el.classList.remove('selected'));
+    event.target.classList.add('selected');
+    addLog(`⚡ ${job} 선택됨`, 'rare');
+}
+function doJobChange() {
+    if(!selectedJob) { addLog('❌ 직업을 선택하세요'); return; }
+    player.job = selectedJob;
+    // 스탯 보정
+    if(selectedJob === '검사') { player.str+=5; player.atk+=10; }
+    else if(selectedJob === '전사') { player.con+=5; player.def+=10; player.maxHp+=50; }
+    else if(selectedJob === '궁수') { player.dex+=5; player.atk+=8; }
+    else if(selectedJob === '마법사') { player.int+=5; player.atk+=5; player.maxMp+=30; }
+    else if(selectedJob === '마검사') { player.str+=3; player.int+=3; player.atk+=7; player.maxMp+=20; }
+    else if(selectedJob === '무도가') { player.str+=4; player.dex+=2; player.atk+=12; }
+    else if(selectedJob === '도적') { player.dex+=5; player.atk+=6; }
+    player.hp = player.maxHp; player.mp = player.maxMp;
+    addLog(`🎉 ${player.job}(으)로 전직 성공!`, 'legend');
+    updateUI();
+}
+
+// ---------- 여관 ----------
+function goInn() {
+    if(player.gold < 50) { addLog('💰 골드가 부족합니다 (50필요)'); return; }
+    player.gold -= 50;
+    player.hp = player.maxHp;
+    player.mp = player.maxMp;
+    addLog('🏨 여관에서 휴식했습니다. HP/MP 회복! (50골드)');
+    updateUI();
+}
+
+// ---------- 상점 (간략) ----------
+function openShop() {
+    let msg = '🛒 상점 - 물약 구입: HP 100 (30G), MP 50 (30G)';
+    if(confirm(msg + '\nHP포션(30G) 구매? 취소=MP포션')) {
+        if(player.gold>=30) { player.gold-=30; player.hp = Math.min(player.maxHp, player.hp+100); addLog('❤️ HP 회복'); }
+        else addLog('골드 부족');
+    } else {
+        if(player.gold>=30) { player.gold-=30; player.mp = Math.min(player.maxMp, player.mp+50); addLog('💙 MP 회복'); }
+        else addLog('골드 부족');
+    }
+    updateUI();
+}
+
+// ---------- 강화 ----------
+function openEnhance() {
+    let panel = document.getElementById('enhancePanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+function enhanceItem(gem) {
+    if(gem === 'ruby' && player.ruby>0) { player.ruby--; player.atk+=2; addLog('🔥 루비 강화 성공! 공격력 +2'); }
+    else if(gem === 'sapphire' && player.sapphire>0) { player.sapphire--; player.def+=2; addLog('💧 사파이어 강화! 방어력 +2'); }
+    else if(gem === 'emerald' && player.emerald>0) { player.emerald--; player.maxHp+=20; player.hp+=20; addLog('🍃 에메랄드 강화! 최대HP +20'); }
+    else { addLog('❌ 해당 보석이 부족합니다'); return; }
+    updateUI();
+}
+
+// ---------- 사냥 ----------
+function getZoneByLevel() {
+    if(player.level >= 90) return huntingZones.abyss;
+    if(player.level >= 70) return huntingZones.dragon;
+    if(player.level >= 50) return huntingZones.oblivion;
+    if(player.level >= 30) return huntingZones.griffin;
+    if(player.level >= 10) return huntingZones.skeleton;
+    return huntingZones.beginner;
+}
+
+function startHunting(type) {
+    let zone = getZoneByLevel();
+    let isBossMap = (type === 'boss');
+    
+    // 보스사냥터는 확률적으로 보스 등장
+    let monsterName, expGain, goldGain, dropList = [];
+    let bossEncounter = false;
+
+    if(isBossMap && zone.boss && Math.random() < 0.1) { // 10% 확률로 보스
+        bossEncounter = true;
+        let boss = zone.boss;
+        monsterName = `👑 ${boss.name} (보스)`;
+        // 간단 전투 (레벨 체크)
+        if(player.level < boss.level-10) {
+            addLog(`⚠️ ${monsterName} (Lv.${boss.level}) 는 너무 강합니다! 도망칩니다.`);
+            return;
+        }
+        // 전투 승리 가정
+        expGain = boss.exp;
+        goldGain = boss.gold;
+        addLog(`⚔️ ${monsterName} 와 전투! 승리!`, 'legend');
+        // 전설 100%
+        if(zone.boss.legendDrop) {
+            dropList.push('💀 전설 아이템 (보스드랍)');
+            // 보석 추가
+            player.ruby += Math.floor(Math.random()*3)+1;
+            player.sapphire += Math.floor(Math.random()*3)+1;
+            player.emerald += Math.floor(Math.random()*3)+1;
+        }
+    } else {
+        // 일반 몬스터
+        let idx = Math.floor(Math.random() * zone.monsters.length);
+        monsterName = zone.monsters[idx];
+        expGain = zone.expBase + Math.floor(Math.random()*20);
+        goldGain = zone.goldBase + Math.floor(Math.random()*30);
+        
+        // 드랍
+        let r = Math.random();
+        if(r < zone.dropRate.legend) dropList.push('✨ 전설 아이템');
+        else if(r < zone.dropRate.legend+zone.dropRate.unique) dropList.push('💜 유니크 아이템');
+        else if(r < zone.dropRate.legend+zone.dropRate.unique+zone.dropRate.rare) dropList.push('💙 레어 아이템');
+        else if(r < zone.dropRate.legend+zone.dropRate.unique+zone.dropRate.rare+zone.dropRate.magic) dropList.push('💚 매직 아이템');
+        else if(r < zone.dropRate.legend+zone.dropRate.unique+zone.dropRate.rare+zone.dropRate.magic+zone.dropRate.normal) dropList.push('🤍 노말 아이템');
+        
+        // 잡아이템 & 보석
+        if(Math.random() < (zone.gemDrop||0.2)) {
+            let gemRand = Math.random();
+            if(gemRand<0.33) { player.ruby++; dropList.push('루비'); }
+            else if(gemRand<0.66) { player.sapphire++; dropList.push('사파이어'); }
+            else { player.emerald++; dropList.push('에메랄드'); }
+        }
+        // 일반 잡템
+        if(zone.items) {
+            let itm = zone.items[Math.floor(Math.random()*zone.items.length)];
+            dropList.push(itm);
+        }
+    }
+
+    // 경험치/골드 획득
+    player.exp += expGain;
+    player.gold += goldGain;
+    addLog(`⚔️ ${monsterName} 처치! +${expGain} EXP, +${goldGain} 골드`, bossEncounter?'legend':'normal');
+    if(dropList.length>0) addLog(`🎁 드랍: ${dropList.join(', ')}`, bossEncounter?'legend':'item-drop');
+
+    // 레벨업 체크
+    while(player.exp >= player.maxExp) {
+        player.level++;
+        player.exp -= player.maxExp;
+        player.maxExp = Math.floor(player.maxExp * 1.4);
+        player.maxHp += 20;
+        player.maxMp += 10;
+        player.hp = player.maxHp;
+        player.mp = player.maxMp;
+        player.atk += 3;
+        player.def += 2;
+        addLog(`🎉 레벨업! Lv.${player.level} 달성!`, 'legend');
+        // 레벨 5 도달시 전직 오픈
+    }
+
+    updateUI();
+}
+
+// 초기화
+window.onload = function() {
+    updateUI();
+};
+</script>
+</body>
+</html>
