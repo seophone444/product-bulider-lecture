@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자기소개 + 오늘의 운세</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .info-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .info-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        
+        /* 운세 섹션 스타일 */
+        .fortune-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .fortune-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .fortune-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .fortune-box {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .fortune-emoji {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .fortune-text {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .fortune-detail {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .fortune-number {
+            font-size: 20px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .fortune-button {
+            background: white;
+            color: #f5576c;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .fortune-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .fortune-button:active {
+            transform: scale(0.95);
+        }
+        
+        .hobby-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .hobby-tag {
+            background: #f0f0f0;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            color: #555;
+            transition: all 0.3s ease;
+        }
+        
+        .hobby-tag:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .quote-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .quote-box::before {
+            content: '"';
+            font-size: 60px;
+            color: #667eea;
+            opacity: 0.3;
+            position: absolute;
+            top: -10px;
+            left: 10px;
+        }
+        
+        .quote-box p {
+            color: #555;
+            line-height: 1.6;
+            margin-left: 30px;
+        }
+        
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .contact-link {
+            width: 50px;
+            height: 50px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #555;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-link:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .age-calculator {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .age-calculator h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .age-number {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- 프로필 헤더 -->
+        <div class="profile-header">
+            <div class="profile-img">
+                😊
+            </div>
+            <h1>김철수</h1>
+            <span class="badge">90년대생 감성</span>
+        </div>
+        
+        <!-- 기본 정보 그리드 -->
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-icon">🎂</div>
+                <div class="info-label">생년월일</div>
+                <div class="info-value">1990년 00월 00일</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon">📱</div>
+                <div class="info-label">MBTI</div>
+                <div class="info-value">INFP</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon">📍</div>
+                <div class="info-label">사는 곳</div>
+                <div class="info-value">서울특별시</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon">💼</div>
+                <div class="info-label">직업</div>
+                <div class="info-value">웹 개발자</div>
+            </div>
+        </div>
+        
+        <!-- 나이 계산기 (1990년생 기준) -->
+        <div class="age-calculator">
+            <h3>🎉 1990년생 나이 계산</h3>
+            <div class="age-number">
+                <script>
+                    // 1990년생의 현재 나이 계산
+                    const birthYear = 1990;
+                    const currentYear = new Date().getFullYear();
+                    const currentMonth = new Date().getMonth() + 1;
+                    const currentDay = new Date().getDate();
+                    
+                    let age = currentYear - birthYear;
+                    
+                    // 생일이 지났는지 체크 (간단하게 1월 1일 기준)
+                    if (currentMonth === 1 && currentDay < 1) {
+                        age--;
+                    }
+                    
+                    // 한국 나이 (출생일 기준 1살, 1월 1일 추가 1살)
+                    const koreanAge = currentYear - birthYear + 1;
+                    
+                    document.write(age + '세 (만 ' + (age-1) + '세, 한국나이 ' + koreanAge + '세)');
+                </script>
+            </div>
+            <p style="font-size: 14px; margin-top: 10px; opacity: 0.9;">
+                ⏰ 자동으로 계산되는 실시간 나이
+            </p>
+        </div>
+        
+        <!-- ===== 오늘의 운세 섹션 (버튼 누르면 변경) ===== -->
+        <div class="fortune-section">
+            <div class="fortune-title">🔮 오늘의 운세</div>
+            <div class="fortune-subtitle">버튼을 누를 때마다 새로운 운세가 나와요!</div>
+            
+            <!-- 운세 표시 박스 -->
+            <div class="fortune-box" id="fortuneBox">
+                <div class="fortune-emoji" id="fortuneEmoji">🎴</div>
+                <div class="fortune-text" id="fortuneText">운세를 뽑아보세요</div>
+                <div class="fortune-detail" id="fortuneDetail">버튼을 누르면 오늘의 운세가 나타납니다</div>
+                <div class="fortune-number" id="fortuneNumber">🎲 행운의 숫자: ?</div>
+            </div>
+            
+            <!-- 운세 뽑기 버튼 -->
+            <button class="fortune-button" onclick="getFortune()">
+                ✨ 오늘의 운세 뽑기 ✨
+            </button>
+        </div>
+        <!-- ================================= -->
+        
+        <!-- 자기소개 섹션 -->
+        <h2 class="section-title">✏️ 자기소개</h2>
+        <div class="quote-box">
+            <p>
+                안녕하세요! 1990년생 웹 개발자입니다.<br>
+                코딩과 커피를 사랑하는 평범한 직장인이에요.<br>
+                새로운 기술을 배우는 걸 좋아하고,<br>
+                사람들과 소통하는 걸 즐깁니다.
+            </p>
+        </div>
+        
+        <!-- 취미 섹션 -->
+        <h2 class="section-title">🎯 취미 & 관심사</h2>
+        <div class="hobby-tags">
+            <span class="hobby-tag">⚽ 축구</span>
+            <span class="hobby-tag">🎮 게임</span>
+            <span class="hobby-tag">📚 독서</span>
+            <span class="hobby-tag">☕ 커피</span>
+            <span class="hobby-tag">💻 코딩</span>
+            <span class="hobby-tag">🎵 음악감상</span>
+            <span class="hobby-tag">🏋️ 운동</span>
+            <span class="hobby-tag">✈️ 여행</span>
+        </div>
+        
+        <!-- 좋아하는 것들 -->
+        <h2 class="section-title">❤️ 좋아하는 것</h2>
+        <div style="margin-bottom: 30px;">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 10px; flex: 1;">
+                    <div style="font-size: 24px; text-align: center;">🍕</div>
+                    <div style="text-align: center;">피자</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 10px; flex: 1;">
+                    <div style="font-size: 24px; text-align: center;">🍜</div>
+                    <div style="text-align: center;">라면</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 10px; flex: 1;">
+                    <div style="font-size: 24px; text-align: center;">🍣</div>
+                    <div style="text-align: center;">초밥</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 10px; flex: 1;">
+                    <div style="font-size: 24px; text-align: center;">☕</div>
+                    <div style="text-align: center;">아메리카노</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 연락처 -->
+        <h2 class="section-title">📞 연락처</h2>
+        <div class="contact-links">
+            <a href="#" class="contact-link">📧</a>
+            <a href="#" class="contact-link">📱</a>
+            <a href="#" class="contact-link">💬</a>
+            <a href="#" class="contact-link">📷</a>
+            <a href="#" class="contact-link">🐦</a>
+        </div>
+        
+        <!-- 푸터 -->
+        <div style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
+            ⓒ 2025. 김철수 All rights reserved.
+        </div>
+    </div>
+
+    <!-- JavaScript: 운세 뽑기 기능 -->
+    <script>
+        function getFortune() {
+            // 1. 운세 목록 (12가지)
+            const fortunes = [
+                { emoji: "⭐", text: "대박", detail: "하늘에 별이 뜨는 날! 큰 행운이 찾아와요", number: "88" },
+                { emoji: "💰", text: "재물운", detail: "뜻밖의 수입이 생길지도? 복권 한 장!", number: "77" },
+                { emoji: "❤️", text: "애정운", detail: "좋은 인연을 만날 확률 200%", number: "99" },
+                { emoji: "💼", text: "직장운", detail: "상사에게 인정받는 날, 승진 확률 UP!", number: "66" },
+                { emoji: "📚", text: "학업운", detail: "집중력이 폭발하는 날, 공부하기 딱 좋아요", number: "44" },
+                { emoji: "💪", text: "건강운", detail: "몸이 가볍고 활기찬 하루", number: "55" },
+                { emoji: "🤝", text: "인간관계", detail: "새로운 친구가 생길 징조", number: "33" },
+                { emoji: "✈️", text: "여행운", detail: "계획에 없던 여행이 생길지도?", number: "22" },
+                { emoji: "🎨", text: "예술운", detail: "창의력이 폭발하는 날", number: "11" },
+                { emoji: "🍀", text: "행운", detail: "네잎클로버를 만날 확률 90%", number: "100" },
+                { emoji: "🎁", text: "선물운", detail: "예상치 못한 선물을 받아요", number: "70" },
+                { emoji: "😊", text: "평범", detail: "무난무난한 하루, 그래도 나쁘지 않아요", number: "50" }
+            ];
+            
+            // 2. 랜덤 인덱스 생성 (0 ~ 11)
+            const randomIndex = Math.floor(Math.random() * fortunes.length);
+            
+            // 3. 선택된 운세
+            const selected = fortunes[randomIndex];
+            
+            // 4. 행운의 숫자 (1~100 랜덤)
+            const luckyNumber = Math.floor(Math.random() * 100) + 1;
+            
+            // 5. HTML 업데이트
+            document.getElementById('fortuneEmoji').textContent = selected.emoji;
+            document.getElementById('fortuneText').textContent = selected.text;
+            document.getElementById('fortuneDetail').textContent = selected.detail;
+            document.getElementById('fortuneNumber').textContent = `🎲 행운의 숫자: ${luckyNumber}`;
+            
+            // 6. 버튼에 애니메이션 효과 (선택사항)
+            const button = event.target;
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 200);
+        }
+    </script>
+</body>
+</html>
