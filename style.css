@@ -1,3 +1,266 @@
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, var(--game-bg-start), var(--game-bg-end));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+        .game-container {
+            max-width: 1400px;
+            width: 100%;
+            background: var(--game-container-bg);
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 20px 40px var(--game-shadow-color), 0 0 0 2px var(--game-inset-border) inset;
+            border: 3px solid var(--game-border-primary);
+        }
+        /* 상단 상태창 */
+        .status-bar {
+            background: var(--status-bar-bg);
+            border-radius: 50px;
+            padding: 20px 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            color: var(--status-bar-text);
+            text-shadow: 2px 2px 0 var(--status-bar-text-shadow);
+            border: 3px solid var(--status-bar-border);
+            box-shadow: inset 0 0 20px var(--status-bar-box-shadow);
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .stat-item {
+            background: var(--stat-item-bg);
+            padding: 12px 20px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid var(--stat-item-border);
+            box-shadow: 0 5px 0 var(--stat-item-shadow);
+            font-size: 1.1rem;
+        }
+        .stat-icon {
+            font-size: 1.6rem;
+            filter: drop-shadow(0 0 5px var(--stat-icon-shadow-color));
+        }
+        .recommend-hunt {
+            background: var(--recommend-hunt-bg);
+            border: 2px solid var(--recommend-hunt-border);
+            box-shadow: 0 0 20px var(--recommend-hunt-shadow);
+        }
+        /* 메인 컨텐츠 */
+        .main-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .character-panel {
+            flex: 2;
+            min-width: 320px;
+            background: var(--char-panel-bg);
+            border-radius: 40px;
+            padding: 25px;
+            border: 4px solid var(--char-panel-border);
+            box-shadow: 0 0 30px var(--char-panel-shadow);
+        }
+        .char-name {
+            font-size: 2.2rem;
+            color: var(--char-name-color);
+            text-shadow: 0 0 15px var(--char-name-shadow-glow), 3px 3px 0 var(--char-name-shadow-offset);
+            margin-bottom: 20px;
+            border-bottom: 3px dashed var(--char-name-border-color);
+            padding-bottom: 15px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            color: var(--stats-grid-text-color);
+            font-size: 1.2rem;
+        }
+        .stat-row {
+            background: var(--stat-row-bg);
+            padding: 12px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid var(--stat-row-border);
+        }
+        .progress {
+            background: var(--progress-bg);
+            height: 25px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--progress-border);
+            margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--progress-fill-default-start), var(--progress-fill-default-end));
+            width: 0%;
+            text-align: center;
+            color: var(--progress-fill-text-color);
+            font-weight: bold;
+            line-height: 25px;
+        }
+        .hp-fill { background: linear-gradient(90deg, var(--progress-fill-hp-start), var(--progress-fill-hp-end)); }
+        .mp-fill { background: linear-gradient(90deg, var(--progress-fill-mp-start), var(--progress-fill-mp-end)); }
+        .exp-fill { background: linear-gradient(90deg, var(--progress-fill-exp-start), var(--progress-fill-exp-end)); }
+        
+        /* 버튼 영역 */
+        .button-panel {
+            flex: 1;
+            min-width: 280px;
+            background: var(--button-panel-bg);
+            border-radius: 50px;
+            padding: 25px;
+            border: 4px solid var(--button-panel-border);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .game-btn {
+            padding: 20px 25px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 60px;
+            background: var(--game-btn-bg);
+            color: var(--game-btn-text);
+            text-shadow: 2px 2px 0 var(--game-btn-text-shadow);
+            border-bottom: 8px solid var(--game-btn-border-bottom);
+            border-right: 4px solid var(--game-btn-border-right);
+            cursor: pointer;
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 0 var(--game-btn-box-shadow);
+        }
+        .game-btn:active {
+            transform: translateY(6px);
+            border-bottom-width: 2px;
+            box-shadow: 0 4px 0 var(--game-btn-active-shadow);
+        }
+        .boss-btn {
+            background: var(--boss-btn-bg);
+            border-bottom-color: var(--boss-btn-border-bottom);
+            border-right-color: var(--boss-btn-border-right);
+            color: var(--boss-btn-text);
+            animation: pulse-red 2s infinite;
+            font-size: 1.8rem;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 10px var(--boss-btn-pulse-color1); }
+            50% { box-shadow: 0 0 40px var(--boss-btn-pulse-color2); }
+            100% { box-shadow: 0 0 10px var(--boss-btn-pulse-color1); }
+        }
+        /* 아이템/전투 로그 */
+        .log-panel {
+            background: var(--log-panel-bg);
+            border-radius: 40px;
+            padding: 20px;
+            border: 3px solid var(--log-panel-border);
+            color: var(--log-panel-text);
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+        .log-entry {
+            padding: 8px 15px;
+            border-bottom: 1px solid var(--log-entry-border);
+            color: var(--log-entry-text);
+        }
+        .item-drop { color: var(--item-drop-color); }
+        .rare-drop { color: var(--rare-drop-color); }
+        .unique-drop { color: var(--unique-drop-color); text-shadow: 0 0 5px var(--unique-drop-shadow); }
+        .legend-drop { color: var(--legend-drop-color); text-shadow: 0 0 10px var(--legend-drop-shadow); }
+        .job-select {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .job-btn {
+            background: var(--job-btn-bg);
+            border: 2px solid var(--job-btn-border);
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: var(--job-btn-text);
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .job-btn.selected {
+            background: var(--job-btn-selected-bg);
+            box-shadow: 0 0 20px var(--job-btn-selected-shadow);
+        }
+        .enhance-panel {
+            background: var(--enhance-panel-bg);
+            border-radius: 40px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 3px solid var(--enhance-panel-border);
+            display: none;
+        }
+        .gem-btn {
+            background: var(--gem-btn-bg);
+            border: 2px solid var(--gem-btn-border);
+            padding: 10px;
+            border-radius: 30px;
+            color: var(--gem-btn-text);
+            margin: 5px;
+        }
+
+        /* 미로 스타일 */
+        #mazeContainer {
+            border: 4px solid var(--maze-container-border);
+            background-color: var(--maze-container-bg);
+            box-shadow: 0 0 20px var(--maze-container-shadow);
+            margin: 20px auto;
+            display: grid;
+        }
+
+        .maze-cell {
+            width: 30px; /* 셀 크기 */
+            height: 30px;
+            background-color: var(--maze-path-color); /* 길 */
+            border: 1px solid transparent;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            color: var(--maze-text-color);
+        }
+
+        .maze-cell.wall {
+            background-color: var(--maze-wall-color); /* 벽 */
+        }
+
+        .maze-cell.player {
+            background-color: var(--maze-player-color); /* 플레이어 */
+            box-shadow: 0 0 8px var(--maze-player-shadow);
+            z-index: 10;
+        }
+
+        .maze-cell.start {
+            background-color: var(--maze-start-color);
+        }
+
+        .maze-cell.end {
+            background-color: var(--maze-end-color);
+        }
+
 * {
     margin: 0;
     padding: 0;
@@ -5,6 +268,7 @@
 }
 
 :root {
+    /* 기존 프로필 페이지 변수 */
     --bg-gradient-start: #667eea;
     --bg-gradient-end: #764ba2;
     --card-bg: white;
@@ -21,9 +285,116 @@
     --contact-link-bg: #f0f0f0;
     --contact-link-color: #555;
     --footer-color: #999;
+
+    /* RPG 게임 변수 */
+    --game-bg-start: #0b0b2b;
+    --game-bg-end: #1a1a3a;
+    --game-container-bg: rgba(20, 20, 40, 0.9);
+    --game-border-primary: #b8860b;
+    --game-shadow-color: rgba(0, 0, 0, 0.8);
+    --game-inset-border: #4a2a6a;
+
+    --status-bar-bg: #0a0a1a;
+    --status-bar-text: #fff;
+    --status-bar-text-shadow: #000;
+    --status-bar-border: #c0a86a;
+    --status-bar-box-shadow: #2a1a4a;
+
+    --stat-item-bg: #2a1e3a;
+    --stat-item-border: #9a7a4a;
+    --stat-item-shadow: #3a2a1a;
+    --stat-icon-shadow-color: gold;
+
+    --recommend-hunt-bg: #2a3a2a;
+    --recommend-hunt-border: #6aba6a;
+    --recommend-hunt-shadow: #3aff3a;
+
+    --char-panel-bg: #1e1a2e;
+    --char-panel-border: #aa8a5a;
+    --char-panel-shadow: #4a2a8a;
+
+    --char-name-color: #ffd966;
+    --char-name-shadow-glow: #ffaa00;
+    --char-name-shadow-offset: #6a2a2a;
+    --char-name-border-color: #c0a86a;
+
+    --stats-grid-text-color: white;
+    --stat-row-bg: #2a1e42;
+    --stat-row-border: #8a6a4a;
+
+    --progress-bg: #1a0e1a;
+    --progress-border: #ba9a6a;
+    --progress-fill-text-color: black;
+
+    --progress-fill-default-start: #3aff3a;
+    --progress-fill-default-end: #aaffaa;
+    --progress-fill-hp-start: #ff3a3a;
+    --progress-fill-hp-end: #ffaaaa;
+    --progress-fill-mp-start: #3a6aff;
+    --progress-fill-mp-end: #aaaaff;
+    --progress-fill-exp-start: #d4af37;
+    --progress-fill-exp-end: #f1e05a;
+
+    --button-panel-bg: #1a122a;
+    --button-panel-border: #b88a4a;
+
+    --game-btn-bg: #3a2e4a;
+    --game-btn-text: white;
+    --game-btn-text-shadow: #000;
+    --game-btn-border-bottom: #5a3e1a;
+    --game-btn-border-right: #8a6a3a;
+    --game-btn-box-shadow: #2a1a0a;
+    --game-btn-active-shadow: #2a1a0a;
+
+    --boss-btn-bg: #8a1a1a;
+    --boss-btn-border-bottom: #4a0000;
+    --boss-btn-border-right: #aa4a4a;
+    --boss-btn-text: #ffcccc;
+    --boss-btn-pulse-color1: #ff0000;
+    --boss-btn-pulse-color2: #ff5555;
+
+    --log-panel-bg: #0f0f1f;
+    --log-panel-border: #aa8a5a;
+    --log-panel-text: #b8b8b8;
+
+    --log-entry-border: #4a3a5a;
+    --log-entry-text: #d4d4d4;
+
+    --item-drop-color: #aaffaa;
+    --rare-drop-color: #ffaa55;
+    --unique-drop-color: #ff55ff;
+    --unique-drop-shadow: magenta;
+    --legend-drop-color: #ffd700;
+    --legend-drop-shadow: orange;
+
+    --job-btn-bg: #2a3a5a;
+    --job-btn-border: gold;
+    --job-btn-text: white;
+    --job-btn-selected-bg: #5a3aaa;
+    --job-btn-selected-shadow: blue;
+
+    --enhance-panel-bg: #2a1a2a;
+    --enhance-panel-border: #d4af37;
+
+    --gem-btn-bg: #4a2a5a;
+    --gem-btn-border: #6ae6ff;
+    --gem-btn-text: white;
+
+    --maze-container-border: #b88a4a;
+    --maze-container-bg: #1a122a;
+    --maze-container-shadow: rgba(184, 138, 74, 0.5);
+
+    --maze-path-color: #2a1a3a;
+    --maze-text-color: white;
+    --maze-wall-color: #0f0f1f;
+    --maze-player-color: #ffd700;
+    --maze-player-shadow: #ffd700;
+    --maze-start-color: #3aff3a;
+    --maze-end-color: #ff3a3a;
 }
 
 body.dark-mode {
+    /* 기존 프로필 페이지 변수 */
     --bg-gradient-start: #2c3e50;
     --bg-gradient-end: #34495e;
     --card-bg: #3b4252;
@@ -40,7 +411,114 @@ body.dark-mode {
     --contact-link-bg: #4c566a;
     --contact-link-color: #d8dee9;
     --footer-color: #d8dee9;
+
+    /* RPG 게임 변수 (다크 모드) */
+    --game-bg-start: #000000;
+    --game-bg-end: #0a0a0a;
+    --game-container-bg: rgba(10, 10, 20, 0.9);
+    --game-border-primary: #8b6e0a;
+    --game-shadow-color: rgba(0, 0, 0, 0.9);
+    --game-inset-border: #3a1e5a;
+
+    --status-bar-bg: #000000;
+    --status-bar-text: #eee;
+    --status-bar-text-shadow: #000;
+    --status-bar-border: #9a7a3a;
+    --status-bar-box-shadow: #1a0a2a;
+
+    --stat-item-bg: #1a0a2a;
+    --stat-item-border: #6a4a2a;
+    --stat-item-shadow: #2a1a0a;
+    --stat-icon-shadow-color: orange;
+
+    --recommend-hunt-bg: #1a2a1a;
+    --recommend-hunt-border: #4a8a4a;
+    --recommend-hunt-shadow: #1aff1a;
+
+    --char-panel-bg: #0e0a1e;
+    --char-panel-border: #7a6a3a;
+    --char-panel-shadow: #2a1a4a;
+
+    --char-name-color: #eebb44;
+    --char-name-shadow-glow: #aa7700;
+    --char-name-shadow-offset: #4a1a1a;
+    --char-name-border-color: #9a7a3a;
+
+    --stats-grid-text-color: #ccc;
+    --stat-row-bg: #1a0a2a;
+    --stat-row-border: #5a3a2a;
+
+    --progress-bg: #0a0a0a;
+    --progress-border: #8a6a3a;
+    --progress-fill-text-color: #eee;
+
+    --progress-fill-default-start: #1a8a1a;
+    --progress-fill-default-end: #6a6a1a;
+    --progress-fill-hp-start: #8a1a1a;
+    --progress-fill-hp-end: #aa5a5a;
+    --progress-fill-mp-start: #1a3a8a;
+    --progress-fill-mp-end: #5a5aaa;
+    --progress-fill-exp-start: #a08020;
+    --progress-fill-exp-end: #c0a040;
+
+    --button-panel-bg: #0a0a1a;
+    --button-panel-border: #8a6a3a;
+
+    --game-btn-bg: #2a1e3a;
+    --game-btn-text: #ddd;
+    --game-btn-text-shadow: #000;
+    --game-btn-border-bottom: #3a2a1a;
+    --game-btn-border-right: #5a3a2a;
+    --game-btn-box-shadow: #1a0a0a;
+    --game-btn-active-shadow: #1a0a0a;
+
+    --boss-btn-bg: #6a1a1a;
+    --boss-btn-border-bottom: #2a0000;
+    --boss-btn-border-right: #7a2a2a;
+    --boss-btn-text: #ff9999;
+    --boss-btn-pulse-color1: #a00000;
+    --boss-btn-pulse-color2: #c03030;
+
+    --log-panel-bg: #000000;
+    --log-panel-border: #7a6a3a;
+    --log-panel-text: #999;
+
+    --log-entry-border: #2a1a3a;
+    --log-entry-text: #bbb;
+
+    --item-drop-color: #6aff6a;
+    --rare-drop-color: #ff8833;
+    --unique-drop-color: #ff33ff;
+    --unique-drop-shadow: purple;
+    --legend-drop-color: #e0b000;
+    --legend-drop-shadow: darkorange;
+
+    --job-btn-bg: #1a2a4a;
+    --job-btn-border: darkgoldenrod;
+    --job-btn-text: #ddd;
+    --job-btn-selected-bg: #3a1a6a;
+    --job-btn-selected-shadow: #0000a0;
+
+    --enhance-panel-bg: #1a0a1a;
+    --enhance-panel-border: #a08020;
+
+    --gem-btn-bg: #2a0a3a;
+    --gem-btn-border: #3ae6ff;
+    --gem-btn-text: #ddd;
+
+    --maze-container-border: #8b6e0a;
+    --maze-container-bg: #0a0a1a;
+    --maze-container-shadow: rgba(139, 110, 10, 0.5);
+
+    --maze-path-color: #1a0a2a;
+    --maze-text-color: #ddd;
+    --maze-wall-color: #000000;
+    --maze-player-color: #eebb44;
+    --maze-player-shadow: #eebb44;
+    --maze-start-color: #1aff1a;
+    --maze-end-color: #e01a1a;
 }
+
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
