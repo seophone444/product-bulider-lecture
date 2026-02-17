@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚔️ 마법의 탑 RPG - 확장판 V5</title>
+    <title>⚔️ 마법의 탑 RPG - 확장판 V6</title>
     <style>
         * {
             box-sizing: border-box;
@@ -292,6 +292,12 @@
             justify-content: space-between;
             align-items: center;
         }
+        .shop-category {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
         .buy-btn {
             background: var(--accent-green);
             color: black;
@@ -398,6 +404,89 @@
             margin-top: 20px;
             border: 2px solid red;
         }
+        .skill-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 10px;
+        }
+        .skill-btn {
+            background: linear-gradient(135deg, #4a2a6a, #2a4a8a);
+            color: gold;
+            border: 2px solid gold;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+        .skill-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px gold;
+        }
+        .skill-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .gambling-area {
+            text-align: center;
+            padding: 20px;
+        }
+        .rsp-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .rsp-btn {
+            font-size: 48px;
+            padding: 20px;
+            background: var(--bg-card);
+            border: 3px solid gold;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .rsp-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px gold;
+            background: var(--btn-hover);
+        }
+        .rsp-btn.selected {
+            background: gold;
+            color: black;
+        }
+        .gambling-result {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .win { color: var(--accent-green); }
+        .lose { color: var(--accent-red); }
+        .draw { color: var(--accent-gold); }
+        .gem-display {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .gem-item {
+            background: var(--bg-card);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid gold;
+        }
         @media (max-width: 768px) {
             .main-panel {
                 grid-template-columns: 1fr;
@@ -407,6 +496,13 @@
             }
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .skill-bar {
+                flex-direction: column;
+            }
+            .rsp-buttons {
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
@@ -485,6 +581,7 @@
                 <button class="game-btn" onclick="showHuntingZones()"><span class="stat-icon">🌲</span> 사냥터</button>
                 <button class="game-btn boss-btn" onclick="showBossZones()"><span class="stat-icon">👾</span> 보스사냥터</button>
                 <button class="game-btn" onclick="openEnhance()"><span class="stat-icon">⚒️</span> 장비 강화</button>
+                <button class="game-btn" onclick="openGambling()"><span class="stat-icon">🎲</span> 도박장</button>
                 <button class="game-btn" onclick="openInventory()"><span class="stat-icon">📦</span> 가방</button>
                 <button class="game-btn" onclick="openEquipment()"><span class="stat-icon">⚔️</span> 장비</button>
                 <button class="game-btn" onclick="openPvpArena()"><span class="stat-icon">⚔️</span> PVP 아레나</button>
@@ -503,7 +600,7 @@
         </div>
 
         <div class="log-panel" id="logPanel">
-            <div class="log-entry">🌟 마법의 탑 RPG 확장판 V5에 오신 것을 환영합니다! (민첩 스탯 버그 수정)</div>
+            <div class="log-entry">🌟 마법의 탑 RPG 확장판 V6에 오신 것을 환영합니다! (MP UI, 도박장 추가)</div>
         </div>
     </div>
 
@@ -532,15 +629,15 @@
             </div>
         </div>
         <div id="battleLog" class="log-panel" style="max-height:150px;"></div>
+        
+        <!-- 스킬 바 (항상 표시) -->
+        <div class="skill-bar" id="skillBar"></div>
+        
         <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
             <button class="game-btn" onclick="battleAction('attack')">⚔️ 공격</button>
-            <button class="game-btn" onclick="battleAction('skill')">✨ 스킬</button>
-            <button class="game-btn" onclick="battleAction('potion')">💊 물약</button>
+            <button class="game-btn" onclick="battleAction('potion')">💊 HP물약</button>
+            <button class="game-btn" onclick="battleAction('mpPotion')">🧪 MP물약</button>
             <button class="game-btn" onclick="battleAction('run')">🏃 도망</button>
-        </div>
-        <div id="skillMenu" style="display:none; margin-top:10px;">
-            <div id="skillList" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;"></div>
-            <button class="game-btn" style="margin-top:10px;" onclick="closeSkillMenu()">닫기</button>
         </div>
     </div>
 
@@ -551,11 +648,35 @@
             <div>
                 <h3 style="color:#44ff44;">구매</h3>
                 <div id="shopBuyList"></div>
-                <h3 style="color:#44ff44; margin-top:20px;">장비 구매</h3>
-                <div id="shopEquipmentList"></div>
+                
+                <h3 style="color:#44ff44; margin-top:30px;">⚔️ 근접 무기</h3>
+                <div id="shopMeleeWeapons" class="shop-category"></div>
+                
+                <h3 style="color:#44ff44; margin-top:30px;">🏹 궁수 무기</h3>
+                <div id="shopBowWeapons" class="shop-category"></div>
+                
+                <h3 style="color:#44ff44; margin-top:30px;">🔮 마법사 무기</h3>
+                <div id="shopMageWeapons" class="shop-category"></div>
+                
+                <h3 style="color:#44ff44; margin-top:30px;">👊 무도가 장비</h3>
+                <div id="shopMartialWeapons" class="shop-category"></div>
+                
+                <h3 style="color:#44ff44; margin-top:30px;">🗡️ 도적 장비</h3>
+                <div id="shopThiefWeapons" class="shop-category"></div>
+                
+                <h3 style="color:#44ff44; margin-top:30px;">🛡️ 방어구</h3>
+                <div id="shopArmors" class="shop-category"></div>
+                
+                <h3 style="color:#44ff44; margin-top:30px;">💍 악세서리</h3>
+                <div id="shopAccessories" class="shop-category"></div>
             </div>
             <div>
                 <h3 style="color:#ff4444;">판매</h3>
+                <div class="gem-display">
+                    <div class="gem-item">💎 루비: <span id="shopRubyCount">0</span></div>
+                    <div class="gem-item">💎 사파이어: <span id="shopSapphireCount">0</span></div>
+                    <div class="gem-item">💎 에메랄드: <span id="shopEmeraldCount">0</span></div>
+                </div>
                 <div id="shopSellList"></div>
             </div>
         </div>
@@ -565,7 +686,7 @@
     <!-- 여관 화면 -->
     <div id="innScreen" class="screen" style="text-align:center;">
         <h2 style="color:gold;">🏨 여관</h2>
-        <p>휴식 비용: <span style="color:gold;">50</span> 골드</p>
+        <p>휴식 비용: <span style="color:gold;">100</span> 골드</p>
         <button class="game-btn" onclick="restInn()">🛌 휴식하기</button>
         <button class="game-btn" style="margin-top:10px;" onclick="showScreen('gameMainScreen')">← 마을로 돌아가기</button>
     </div>
@@ -573,13 +694,15 @@
     <!-- 장비 강화 화면 -->
     <div id="enhanceScreen" class="screen" style="text-align:center;">
         <h2 style="color:gold;">⚒️ 장비 강화</h2>
-        <div style="margin:20px 0;">
-            <p>💎 루비: <span id="rubyCount">0</span> | 💎 사파이어: <span id="sapphireCount">0</span> | 💎 에메랄드: <span id="emeraldCount">0</span></p>
+        <div class="gem-display" style="margin:20px 0;">
+            <div class="gem-item">💎 루비: <span id="rubyCount">0</span></div>
+            <div class="gem-item">💎 사파이어: <span id="sapphireCount">0</span></div>
+            <div class="gem-item">💎 에메랄드: <span id="emeraldCount">0</span></div>
         </div>
-        <div style="display:flex; gap:10px; justify-content:center;">
-            <button class="gem-btn" onclick="enhanceItem('weapon')">⚔️ 무기 강화 (루비 1개)</button>
-            <button class="gem-btn" onclick="enhanceItem('armor')">🛡️ 방어구 강화 (사파이어 1개)</button>
-            <button class="gem-btn" onclick="enhanceItem('accessory')">💍 악세서리 강화 (에메랄드 1개)</button>
+        <div style="display:flex; gap:20px; justify-content:center;">
+            <button class="gem-btn" onclick="enhanceItem('weapon')">⚔️ 무기 강화 (루비 5개)</button>
+            <button class="gem-btn" onclick="enhanceItem('armor')">🛡️ 방어구 강화 (사파이어 5개)</button>
+            <button class="gem-btn" onclick="enhanceItem('accessory')">💍 악세서리 강화 (에메랄드 5개)</button>
         </div>
         <button class="game-btn" style="margin-top:20px;" onclick="showScreen('gameMainScreen')">← 마을로 돌아가기</button>
     </div>
@@ -587,6 +710,11 @@
     <!-- 가방 화면 -->
     <div id="inventoryScreen" class="screen">
         <h2 style="color:gold; text-align:center;">📦 가방</h2>
+        <div class="gem-display">
+            <div class="gem-item">💎 루비: <span id="inventoryRubyCount">0</span></div>
+            <div class="gem-item">💎 사파이어: <span id="inventorySapphireCount">0</span></div>
+            <div class="gem-item">💎 에메랄드: <span id="inventoryEmeraldCount">0</span></div>
+        </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
             <span>무게: <span id="inventoryWeight">0</span>/<span id="maxInventoryWeight">20</span></span>
             <span>골드: <span id="inventoryGold">500</span></span>
@@ -645,6 +773,25 @@
         <div style="margin-top:20px;">
             <button class="game-btn" onclick="guildDonate()">💰 기부 (100G = 10GP)</button>
             <button class="game-btn" onclick="guildUpgrade()">⬆️ 길드 업그레이드 (500GP)</button>
+        </div>
+        <button class="game-btn" style="margin-top:20px;" onclick="showScreen('gameMainScreen')">← 마을로 돌아가기</button>
+    </div>
+
+    <!-- 도박장 화면 -->
+    <div id="gamblingScreen" class="screen">
+        <h2 style="color:gold; text-align:center;">🎲 도박장</h2>
+        <div style="text-align:center; margin:20px 0;">
+            <p>베팅 금액: <span style="color:gold;" id="betAmount">1000</span> 골드</p>
+            <input type="range" id="betSlider" min="1000" max="10000" step="1000" value="1000" style="width:80%;">
+        </div>
+        <div class="gambling-area">
+            <h3>가위바위보</h3>
+            <div class="rsp-buttons">
+                <button class="rsp-btn" onclick="playRSP('rock')">✊</button>
+                <button class="rsp-btn" onclick="playRSP('paper')">✋</button>
+                <button class="rsp-btn" onclick="playRSP('scissors')">✌️</button>
+            </div>
+            <div id="gamblingResult" class="gambling-result"></div>
         </div>
         <button class="game-btn" style="margin-top:20px;" onclick="showScreen('gameMainScreen')">← 마을로 돌아가기</button>
     </div>
@@ -778,28 +925,33 @@ const gameItems = {
     bronzeSword: { id: 'bronzeSword', name: '청동검', type: 'weapon', atk: 12, magic: 0, price: 300, sellPrice: 150 },
     ironSword: { id: 'ironSword', name: '철검', type: 'weapon', atk: 20, magic: 0, price: 500, sellPrice: 250 },
     steelSword: { id: 'steelSword', name: '강철검', type: 'weapon', atk: 30, magic: 0, price: 800, sellPrice: 400 },
-    magicStaff: { id: 'magicStaff', name: '마법 지팡이', type: 'weapon', atk: 5, magic: 20, price: 400, sellPrice: 200 },
+    // 궁수 무기
+    shortBow: { id: 'shortBow', name: '단궁', type: 'weapon', atk: 8, magic: 0, dex: 2, price: 250, sellPrice: 125 },
+    longBow: { id: 'longBow', name: '장궁', type: 'weapon', atk: 15, magic: 0, dex: 4, price: 450, sellPrice: 225 },
+    compositeBow: { id: 'compositeBow', name: '합성궁', type: 'weapon', atk: 25, magic: 0, dex: 6, price: 750, sellPrice: 375 },
+    // 마법사 무기
+    magicStaff: { id: 'magicStaff', name: '마법 지팡이', type: 'weapon', atk: 5, magic: 20, int: 3, price: 400, sellPrice: 200 },
+    arcaneStaff: { id: 'arcaneStaff', name: '신비의 지팡이', type: 'weapon', atk: 8, magic: 35, int: 5, price: 700, sellPrice: 350 },
+    wizardOrb: { id: 'wizardOrb', name: '마법사의 구슬', type: 'weapon', atk: 3, magic: 50, int: 8, price: 1000, sellPrice: 500 },
+    // 무도가 무기
+    knuckles: { id: 'knuckles', name: '너클', type: 'weapon', atk: 10, magic: 0, str: 2, price: 200, sellPrice: 100 },
+    ironFist: { id: 'ironFist', name: '철권', type: 'weapon', atk: 18, magic: 0, str: 4, price: 400, sellPrice: 200 },
+    dragonClaw: { id: 'dragonClaw', name: '용의 발톱', type: 'weapon', atk: 28, magic: 0, str: 6, price: 700, sellPrice: 350 },
+    // 도적 무기
+    dagger: { id: 'dagger', name: '단검', type: 'weapon', atk: 8, magic: 0, dex: 3, price: 220, sellPrice: 110 },
+    twinDagger: { id: 'twinDagger', name: '쌍검', type: 'weapon', atk: 16, magic: 0, dex: 5, price: 480, sellPrice: 240 },
+    shadowDagger: { id: 'shadowDagger', name: '그림자 단검', type: 'weapon', atk: 24, magic: 0, dex: 7, price: 800, sellPrice: 400 },
+    // 방어구
     clothArmor: { id: 'clothArmor', name: '천갑옷', type: 'armor', def: 2, magicDef: 1, price: 150, sellPrice: 75 },
     leatherArmor: { id: 'leatherArmor', name: '가죽 갑옷', type: 'armor', def: 5, magicDef: 2, price: 300, sellPrice: 150 },
     ironArmor: { id: 'ironArmor', name: '철 갑옷', type: 'armor', def: 10, magicDef: 3, price: 600, sellPrice: 300 },
     steelArmor: { id: 'steelArmor', name: '강철 갑옷', type: 'armor', def: 15, magicDef: 5, price: 900, sellPrice: 450 },
     magicRobe: { id: 'magicRobe', name: '마법 로브', type: 'armor', def: 3, magicDef: 15, price: 500, sellPrice: 250 },
-    // 랜덤 장비
-    rareWeapons: [
-        { id: 'flameSword', name: '불꽃검', type: 'weapon', atk: 40, magic: 10, price: 2000, sellPrice: 1000 },
-        { id: 'iceDagger', name: '얼음 단검', type: 'weapon', atk: 25, magic: 25, price: 1800, sellPrice: 900 },
-        { id: 'thunderAxe', name: '번개 도끼', type: 'weapon', atk: 50, magic: 0, price: 2500, sellPrice: 1250 }
-    ],
-    rareArmors: [
-        { id: 'dragonArmor', name: '용비늘 갑옷', type: 'armor', def: 25, magicDef: 15, price: 3000, sellPrice: 1500 },
-        { id: 'phantomRobe', name: '유령 로브', type: 'armor', def: 10, magicDef: 30, price: 2800, sellPrice: 1400 },
-        { id: 'warriorPlate', name: '전사 판금', type: 'armor', def: 30, magicDef: 10, price: 3200, sellPrice: 1600 }
-    ],
-    accessories: [
-        { id: 'magicRing', name: '마법 반지', type: 'accessory', magicDef: 10, price: 800, sellPrice: 400 },
-        { id: 'powerBracelet', name: '힘의 팔찌', type: 'accessory', atk: 10, price: 1000, sellPrice: 500 },
-        { id: 'guardianNecklace', name: '수호자의 목걸이', type: 'accessory', def: 10, price: 900, sellPrice: 450 }
-    ]
+    // 악세서리
+    magicRing: { id: 'magicRing', name: '마법 반지', type: 'accessory', magicDef: 10, int: 2, price: 800, sellPrice: 400 },
+    powerBracelet: { id: 'powerBracelet', name: '힘의 팔찌', type: 'accessory', str: 2, atk: 10, price: 1000, sellPrice: 500 },
+    guardianNecklace: { id: 'guardianNecklace', name: '수호자의 목걸이', type: 'accessory', con: 2, def: 10, price: 900, sellPrice: 450 },
+    dexterityRing: { id: 'dexterityRing', name: '민첩의 반지', type: 'accessory', dex: 3, price: 850, sellPrice: 425 }
 };
 
 // ==================== 스킬 데이터 ====================
@@ -809,7 +961,7 @@ const skills = {
     heavyStrike: { name: '강타', mpCost: 15, damage: 2.5, type: 'physical' },
     fireball: { name: '파이어볼', mpCost: 20, damage: 2.2, type: 'magic' },
     iceLance: { name: '아이스 랜스', mpCost: 25, damage: 2.8, type: 'magic' },
-    heal: { name: '치유', mpCost: 15, heal: 150, type: 'heal' },
+    heal: { name: '치유', mpCost: 100, heal: 150, type: 'heal' }, // MP 소모 증가
     arrowShot: { name: '화살 쏘기', mpCost: 5, damage: 1.5, type: 'physical' },
     multiShot: { name: '멀티샷', mpCost: 10, damage: 1.2, hits: 3, type: 'physical' },
     holyLight: { name: '성스러운 빛', mpCost: 20, heal: 250, type: 'heal' },
@@ -857,22 +1009,24 @@ const huntingZones = {
         ],
         drops: [
             { id: 'wolfLeather', rate: 0.3 }, { id: 'koboldLeather', rate: 0.3 }, { id: 'spiderShell', rate: 0.2 }
-        ]
+        ],
+        gemDrop: false
     },
     skeleton: {
         name: '해골 던전', minLv: 10, maxLv: 25,
         monsters: [
-            { name: '해골 병사', level: 10, hp: 250, atk: 40, def: 12, exp: 60, gold: 30 },
-            { name: '해골 궁수', level: 12, hp: 240, atk: 45, def: 11, exp: 65, gold: 32 },
-            { name: '해골 법사', level: 13, hp: 230, atk: 48, def: 10, exp: 70, gold: 35 },
-            { name: '해골 기사', level: 15, hp: 300, atk: 52, def: 15, exp: 80, gold: 40 },
-            { name: '망나니 해골', level: 17, hp: 350, atk: 58, def: 18, exp: 90, gold: 45 },
-            { name: '해골 골렘', level: 20, hp: 450, atk: 65, def: 22, exp: 110, gold: 55 },
-            { name: '해골 대장', level: 22, hp: 500, atk: 75, def: 25, exp: 130, gold: 65 }
+            { name: '해골 병사', level: 12, hp: 350, atk: 55, def: 18, exp: 80, gold: 40 },
+            { name: '해골 궁수', level: 14, hp: 340, atk: 60, def: 16, exp: 85, gold: 42 },
+            { name: '해골 법사', level: 15, hp: 330, atk: 65, def: 15, exp: 90, gold: 45 },
+            { name: '해골 기사', level: 17, hp: 400, atk: 70, def: 22, exp: 100, gold: 50 },
+            { name: '망나니 해골', level: 19, hp: 450, atk: 75, def: 25, exp: 110, gold: 55 },
+            { name: '해골 골렘', level: 22, hp: 550, atk: 85, def: 30, exp: 130, gold: 65 },
+            { name: '해골 대장', level: 24, hp: 600, atk: 95, def: 35, exp: 150, gold: 75 }
         ],
         drops: [
-            { id: 'ruby', rate: 0.1 }, { id: 'sapphire', rate: 0.1 }, { id: 'emerald', rate: 0.1 }
-        ]
+            { id: 'ruby', rate: 0.15 }, { id: 'sapphire', rate: 0.15 }, { id: 'emerald', rate: 0.15 }
+        ],
+        gemDrop: true
     },
     griffin: {
         name: '그리핀의 협곡', minLv: 25, maxLv: 45,
@@ -887,8 +1041,9 @@ const huntingZones = {
             { name: '켈베로스', level: 42, hp: 1000, atk: 135, def: 42, exp: 270, gold: 140 }
         ],
         drops: [
-            { id: 'ruby', rate: 0.15 }, { id: 'sapphire', rate: 0.15 }, { id: 'emerald', rate: 0.15 }
+            { id: 'ruby', rate: 0.2 }, { id: 'sapphire', rate: 0.2 }, { id: 'emerald', rate: 0.2 }
         ],
+        gemDrop: true,
         boss: { name: '그리핀', level: 45, hp: 3000, atk: 160, def: 55, exp: 1000, gold: 500 }
     },
     oblivion: {
@@ -904,8 +1059,9 @@ const huntingZones = {
             { name: '심연의 감시자', level: 62, hp: 1600, atk: 195, def: 80, exp: 470, gold: 280 }
         ],
         drops: [
-            { id: 'ruby', rate: 0.2 }, { id: 'sapphire', rate: 0.2 }, { id: 'emerald', rate: 0.2 }
+            { id: 'ruby', rate: 0.25 }, { id: 'sapphire', rate: 0.25 }, { id: 'emerald', rate: 0.25 }
         ],
+        gemDrop: true,
         bosses: [
             { name: '피의 군주 바르칸', level: 65, hp: 4500, atk: 220, def: 95, exp: 1800, gold: 900 },
             { name: '심연의 대사제 모르타인', level: 68, hp: 5000, atk: 240, def: 90, exp: 2000, gold: 1100 }
@@ -923,8 +1079,9 @@ const huntingZones = {
             { name: '고대 청동 드래곤', level: 80, hp: 3800, atk: 300, def: 135, exp: 1000, gold: 550 }
         ],
         drops: [
-            { id: 'ruby', rate: 0.25 }, { id: 'sapphire', rate: 0.25 }, { id: 'emerald', rate: 0.25 }
+            { id: 'ruby', rate: 0.3 }, { id: 'sapphire', rate: 0.3 }, { id: 'emerald', rate: 0.3 }
         ],
+        gemDrop: true,
         bosses: [
             { name: '화염폭군 이그나르', level: 82, hp: 9000, atk: 340, def: 160, exp: 3000, gold: 1800 },
             { name: '폭풍룡 카르디온', level: 85, hp: 10000, atk: 370, def: 150, exp: 3500, gold: 2200 }
@@ -943,8 +1100,9 @@ const huntingZones = {
             { name: '심연의 군단장', level: 99, hp: 6000, atk: 470, def: 230, exp: 2200, gold: 1100 }
         ],
         drops: [
-            { id: 'ruby', rate: 0.3 }, { id: 'sapphire', rate: 0.3 }, { id: 'emerald', rate: 0.3 }
+            { id: 'ruby', rate: 0.35 }, { id: 'sapphire', rate: 0.35 }, { id: 'emerald', rate: 0.35 }
         ],
+        gemDrop: true,
         bosses: [
             { name: '마계군주 벨카르', level: 99, hp: 18000, atk: 550, def: 280, exp: 6000, gold: 3500 },
             { name: '심연대마왕 아자로스', level: 100, hp: 25000, atk: 650, def: 350, exp: 12000, gold: 6000 }
@@ -958,44 +1116,44 @@ function showScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
 }
 
-// ==================== 스탯 계산 (수정된 버전) ====================
+// ==================== 스탯 계산 ====================
 function calculateStats() {
-    // 기본 공격력 = 힘 * 2 + (민첩 * 0.5) + 무기 공격력 - 민첩이 공격력에 기여하도록 수정!
-    let baseAtk = player.str * 2;
-    baseAtk += Math.floor(player.dex * 0.5); // 민첩의 50%를 공격력에 추가
-    if (player.weapon && player.weapon.equipped) baseAtk += player.weapon.atk || 0;
-    if (player.accessory && player.accessory.equipped && player.accessory.atk) baseAtk += player.accessory.atk;
-    player.atk = baseAtk;
+    // 기본 공격력 = 힘 * 2 + (민첩 * 0.5) + 무기 공격력
+    let totalStr = player.str;
+    let totalDex = player.dex;
+    let totalInt = player.int;
+    let totalCon = player.con;
 
-    // 마력 = 지능 * 3 + (민첩 * 0.2) + 무기 마력 - 민첩이 마법에도 약간 영향
-    let baseMagic = player.int * 3;
-    baseMagic += Math.floor(player.dex * 0.2);
-    if (player.weapon && player.weapon.equipped) baseMagic += player.weapon.magic || 0;
-    player.magic = baseMagic;
+    if (player.weapon && player.weapon.equipped) {
+        totalStr += player.weapon.str || 0;
+        totalDex += player.weapon.dex || 0;
+        totalInt += player.weapon.int || 0;
+    }
+    if (player.armor && player.armor.equipped) {
+        totalStr += player.armor.str || 0;
+        totalDex += player.armor.dex || 0;
+        totalInt += player.armor.int || 0;
+        totalCon += player.armor.con || 0;
+    }
+    if (player.accessory && player.accessory.equipped) {
+        totalStr += player.accessory.str || 0;
+        totalDex += player.accessory.dex || 0;
+        totalInt += player.accessory.int || 0;
+        totalCon += player.accessory.con || 0;
+    }
+    
+    player.atk = totalStr * 2 + Math.floor(totalDex * 0.5) + (player.weapon?.atk || 0) + (player.accessory?.atk || 0);
+    player.magic = totalInt * 3 + Math.floor(totalDex * 0.2) + (player.weapon?.magic || 0);
+    player.def = totalCon * 2 + Math.floor(totalDex * 0.3) + (player.armor?.def || 0) + (player.accessory?.def || 0);
+    player.magicDef = totalInt * 2 + (player.armor?.magicDef || 0) + (player.accessory?.magicDef || 0);
 
-    // 방어력 = 체력 * 2 + (민첩 * 0.3) + 방어구 방어력 - 민첩이 회피/방어에 영향
-    let baseDef = player.con * 2;
-    baseDef += Math.floor(player.dex * 0.3);
-    if (player.armor && player.armor.equipped) baseDef += player.armor.def || 0;
-    if (player.accessory && player.accessory.equipped && player.accessory.def) baseDef += player.accessory.def;
-    player.def = Math.floor(baseDef);
-
-    // 마법방어 = 지능 * 2 + 방어구 마법방어 + 악세서리 마법방어
-    let baseMagicDef = player.int * 2;
-    if (player.armor && player.armor.equipped) baseMagicDef += player.armor.magicDef || 0;
-    if (player.accessory && player.accessory.equipped) baseMagicDef += player.accessory.magicDef || 0;
-    player.magicDef = Math.floor(baseMagicDef);
-
-    // 최대 HP = 체력 * 15
-    player.maxHp = player.con * 15;
+    player.maxHp = totalCon * 15;
     if (player.hp > player.maxHp) player.hp = player.maxHp;
 
-    // 최대 MP = 지능 * 8
-    player.maxMp = player.int * 8;
+    player.maxMp = totalInt * 8;
     if (player.mp > player.maxMp) player.mp = player.maxMp;
 
-    // 가방 최대 크기 = 기본 20 + 힘 + (민첩 * 0.3)
-    player.maxInventory = 20 + player.str + Math.floor(player.dex * 0.3);
+    player.maxInventory = 20 + totalStr + Math.floor(totalDex * 0.3);
 }
 
 // ==================== UI 업데이트 ====================
@@ -1057,6 +1215,12 @@ function updateUI() {
     document.getElementById('rubyCount').textContent = player.ruby;
     document.getElementById('sapphireCount').textContent = player.sapphire;
     document.getElementById('emeraldCount').textContent = player.emerald;
+    document.getElementById('shopRubyCount').textContent = player.ruby;
+    document.getElementById('shopSapphireCount').textContent = player.sapphire;
+    document.getElementById('shopEmeraldCount').textContent = player.emerald;
+    document.getElementById('inventoryRubyCount').textContent = player.ruby;
+    document.getElementById('inventorySapphireCount').textContent = player.sapphire;
+    document.getElementById('inventoryEmeraldCount').textContent = player.emerald;
 
     // PVP 전적
     document.getElementById('pvpWins').textContent = player.pvpWins;
@@ -1071,6 +1235,25 @@ function updateUI() {
     updateJobList();
     updateGuildUI();
     updateEquipmentUI();
+    updateSkillBar();
+}
+
+// ==================== 스킬 바 업데이트 ====================
+function updateSkillBar() {
+    const skillBar = document.getElementById('skillBar');
+    skillBar.innerHTML = '';
+    
+    player.skills.forEach(skillId => {
+        const skill = skills[skillId];
+        if (!skill || skillId === 'basicAttack') return;
+        
+        const btn = document.createElement('button');
+        btn.className = 'skill-btn';
+        btn.textContent = `${skill.name} (${skill.mpCost}MP)`;
+        btn.onclick = () => useSkill(skillId);
+        btn.disabled = player.mp < skill.mpCost;
+        skillBar.appendChild(btn);
+    });
 }
 
 // ==================== 스탯 포인트 추가 ====================
@@ -1096,14 +1279,11 @@ function updateJobList() {
         const btn = document.createElement('div');
         btn.className = 'job-btn';
         
-        // 5레벨에 무료 전직
         if (player.level >= 5 && player.job === '모험가') {
             btn.classList.add('free');
             btn.textContent = `${job.name} (Lv.5 무료)`;
             btn.onclick = () => changeJobFree(job.name);
-        }
-        // 30레벨부터 20000G로 전직
-        else if (player.level >= 30 && player.gold >= 20000) {
+        } else if (player.level >= 30 && player.gold >= 20000) {
             btn.textContent = `${job.name} (Lv.30, 20000G)`;
             btn.onclick = () => changeJobPaid(job.name);
         } else if (player.level >= 30) {
@@ -1126,12 +1306,10 @@ function changeJobFree(jobName) {
     player.int += job.int;
     player.con += job.con;
     
-    // 기본 스킬 자동 습득
     if (job.baseSkill && !player.skills.includes(job.baseSkill)) {
         player.skills.push(job.baseSkill);
     }
     
-    // 추가 스킬 습득
     job.skills.forEach(skill => {
         if (!player.skills.includes(skill)) {
             player.skills.push(skill);
@@ -1188,11 +1366,11 @@ function goInn() {
 }
 
 function restInn() {
-    if (player.gold < 50) {
-        alert('골드가 부족합니다!');
+    if (player.gold < 100) {
+        alert('골드가 부족합니다! (100G 필요)');
         return;
     }
-    player.gold -= 50;
+    player.gold -= 100;
     player.hp = player.maxHp;
     player.mp = player.maxMp;
     addLog('🏨 여관에서 휴식하여 HP/MP가 회복되었습니다.');
@@ -1208,11 +1386,23 @@ function openShop() {
 
 function updateShop() {
     const buyList = document.getElementById('shopBuyList');
-    const equipmentList = document.getElementById('shopEquipmentList');
+    const meleeWeapons = document.getElementById('shopMeleeWeapons');
+    const bowWeapons = document.getElementById('shopBowWeapons');
+    const mageWeapons = document.getElementById('shopMageWeapons');
+    const martialWeapons = document.getElementById('shopMartialWeapons');
+    const thiefWeapons = document.getElementById('shopThiefWeapons');
+    const armors = document.getElementById('shopArmors');
+    const accessories = document.getElementById('shopAccessories');
     const sellList = document.getElementById('shopSellList');
     
     buyList.innerHTML = '';
-    equipmentList.innerHTML = '';
+    meleeWeapons.innerHTML = '';
+    bowWeapons.innerHTML = '';
+    mageWeapons.innerHTML = '';
+    martialWeapons.innerHTML = '';
+    thiefWeapons.innerHTML = '';
+    armors.innerHTML = '';
+    accessories.innerHTML = '';
     sellList.innerHTML = '';
 
     // 물약 구매
@@ -1228,9 +1418,9 @@ function updateShop() {
         buyList.appendChild(div);
     });
 
-    // 기본 장비 구매
-    const baseEquip = ['woodStick', 'clothArmor', 'bronzeSword', 'leatherArmor', 'ironSword', 'ironArmor', 'steelSword', 'steelArmor', 'magicStaff', 'magicRobe'];
-    baseEquip.forEach(id => {
+    // 근접 무기
+    const meleeList = ['woodStick', 'bronzeSword', 'ironSword', 'steelSword'];
+    meleeList.forEach(id => {
         const item = gameItems[id];
         const div = document.createElement('div');
         div.className = 'shop-item';
@@ -1238,42 +1428,85 @@ function updateShop() {
             <span>${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
             <button class="buy-btn" onclick="buyEquipment('${id}')">구매</button>
         `;
-        equipmentList.appendChild(div);
+        meleeWeapons.appendChild(div);
     });
 
-    // 랜덤 장비 (10% 확률로 등장)
-    if (Math.random() < 0.1) {
-        const rareWeapon = gameItems.rareWeapons[Math.floor(Math.random() * gameItems.rareWeapons.length)];
+    // 궁수 무기
+    const bowList = ['shortBow', 'longBow', 'compositeBow'];
+    bowList.forEach(id => {
+        const item = gameItems[id];
         const div = document.createElement('div');
         div.className = 'shop-item';
-        div.style.border = '2px solid gold';
         div.innerHTML = `
-            <span>✨ ${rareWeapon.name} (${rareWeapon.price}G) ✨</span>
-            <button class="buy-btn" onclick="buyEquipment('${rareWeapon.id}')">구매</button>
+            <span>${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
+            <button class="buy-btn" onclick="buyEquipment('${id}')">구매</button>
         `;
-        equipmentList.appendChild(div);
-    }
-    if (Math.random() < 0.1) {
-        const rareArmor = gameItems.rareArmors[Math.floor(Math.random() * gameItems.rareArmors.length)];
+        bowWeapons.appendChild(div);
+    });
+
+    // 마법사 무기
+    const mageList = ['magicStaff', 'arcaneStaff', 'wizardOrb'];
+    mageList.forEach(id => {
+        const item = gameItems[id];
         const div = document.createElement('div');
         div.className = 'shop-item';
-        div.style.border = '2px solid gold';
         div.innerHTML = `
-            <span>✨ ${rareArmor.name} (${rareArmor.price}G) ✨</span>
-            <button class="buy-btn" onclick="buyEquipment('${rareArmor.id}')">구매</button>
+            <span>${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
+            <button class="buy-btn" onclick="buyEquipment('${id}')">구매</button>
         `;
-        equipmentList.appendChild(div);
-    }
+        mageWeapons.appendChild(div);
+    });
+
+    // 무도가 무기
+    const martialList = ['knuckles', 'ironFist', 'dragonClaw'];
+    martialList.forEach(id => {
+        const item = gameItems[id];
+        const div = document.createElement('div');
+        div.className = 'shop-item';
+        div.innerHTML = `
+            <span>${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
+            <button class="buy-btn" onclick="buyEquipment('${id}')">구매</button>
+        `;
+        martialWeapons.appendChild(div);
+    });
+
+    // 도적 무기
+    const thiefList = ['dagger', 'twinDagger', 'shadowDagger'];
+    thiefList.forEach(id => {
+        const item = gameItems[id];
+        const div = document.createElement('div');
+        div.className = 'shop-item';
+        div.innerHTML = `
+            <span>${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
+            <button class="buy-btn" onclick="buyEquipment('${id}')">구매</button>
+        `;
+        thiefWeapons.appendChild(div);
+    });
+
+    // 방어구
+    const armorList = ['clothArmor', 'leatherArmor', 'ironArmor', 'steelArmor', 'magicRobe'];
+    armorList.forEach(id => {
+        const item = gameItems[id];
+        const div = document.createElement('div');
+        div.className = 'shop-item';
+        div.innerHTML = `
+            <span>${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
+            <button class="buy-btn" onclick="buyEquipment('${id}')">구매</button>
+        `;
+        armors.appendChild(div);
+    });
 
     // 악세서리
-    gameItems.accessories.forEach(item => {
+    const accessoryList = ['magicRing', 'powerBracelet', 'guardianNecklace', 'dexterityRing'];
+    accessoryList.forEach(id => {
+        const item = gameItems[id];
         const div = document.createElement('div');
         div.className = 'shop-item';
         div.innerHTML = `
-            <span>💍 ${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
-            <button class="buy-btn" onclick="buyEquipment('${item.id}')">구매</button>
+            <span>${item.name} (${item.price}G) ${isEquipped(item.id) ? '<span class="equipped">[착용중]</span>' : ''}</span>
+            <button class="buy-btn" onclick="buyEquipment('${id}')">구매</button>
         `;
-        equipmentList.appendChild(div);
+        accessories.appendChild(div);
     });
 
     // 판매 목록 (인벤토리)
@@ -1286,35 +1519,6 @@ function updateShop() {
         `;
         sellList.appendChild(div);
     });
-
-    // 착용중인 장비 판매 옵션
-    if (player.weapon && player.weapon.equipped && player.weapon.id !== 'woodStick') {
-        const div = document.createElement('div');
-        div.className = 'shop-item';
-        div.innerHTML = `
-            <span>⚔️ ${player.weapon.name} (착용중) (${player.weapon.sellPrice || 50}G)</span>
-            <button class="sell-btn" onclick="sellEquipped('weapon')">판매</button>
-        `;
-        sellList.appendChild(div);
-    }
-    if (player.armor && player.armor.equipped && player.armor.id !== 'clothArmor') {
-        const div = document.createElement('div');
-        div.className = 'shop-item';
-        div.innerHTML = `
-            <span>🛡️ ${player.armor.name} (착용중) (${player.armor.sellPrice || 50}G)</span>
-            <button class="sell-btn" onclick="sellEquipped('armor')">판매</button>
-        `;
-        sellList.appendChild(div);
-    }
-    if (player.accessory && player.accessory.equipped) {
-        const div = document.createElement('div');
-        div.className = 'shop-item';
-        div.innerHTML = `
-            <span>💍 ${player.accessory.name} (착용중) (${player.accessory.sellPrice || 50}G)</span>
-            <button class="sell-btn" onclick="sellEquipped('accessory')">판매</button>
-        `;
-        sellList.appendChild(div);
-    }
 }
 
 function isEquipped(itemId) {
@@ -1336,7 +1540,6 @@ function buyItem(itemId) {
     
     player.gold -= item.price;
     
-    // 물약 처리 (hpPotions, mpPotions 별도 관리)
     if (itemId === 'hpPotion') {
         player.hpPotions++;
     } else if (itemId === 'mpPotion') {
@@ -1352,16 +1555,7 @@ function buyItem(itemId) {
 }
 
 function buyEquipment(itemId) {
-    let item;
-    // 랜덤 장비 처리
-    for (let cat of ['rareWeapons', 'rareArmors', 'accessories']) {
-        const found = gameItems[cat]?.find(i => i.id === itemId);
-        if (found) {
-            item = found;
-            break;
-        }
-    }
-    if (!item) item = gameItems[itemId];
+    let item = gameItems[itemId];
     
     if (player.gold < item.price) {
         alert('골드가 부족합니다!');
@@ -1394,35 +1588,6 @@ function sellItem(index) {
     updateShop();
 }
 
-function sellEquipped(type) {
-    let item;
-    if (type === 'weapon' && player.weapon) {
-        item = player.weapon;
-        if (item.id === 'woodStick') {
-            alert('기본 장비는 판매할 수 없습니다!');
-            return;
-        }
-        player.weapon = { id: 'woodStick', name: '나무몽둥이', type: 'weapon', atk: 5, magic: 0, price: 100, sellPrice: 50, equipped: true };
-    } else if (type === 'armor' && player.armor) {
-        item = player.armor;
-        if (item.id === 'clothArmor') {
-            alert('기본 장비는 판매할 수 없습니다!');
-            return;
-        }
-        player.armor = { id: 'clothArmor', name: '천갑옷', type: 'armor', def: 2, magicDef: 1, price: 150, sellPrice: 75, equipped: true };
-    } else if (type === 'accessory' && player.accessory) {
-        item = player.accessory;
-        player.accessory = null;
-    } else return;
-    
-    player.gold += item.sellPrice || 50;
-    addLog(`💰 ${item.name}을(를) 판매했습니다.`);
-    calculateStats();
-    playSound('potion');
-    updateUI();
-    updateShop();
-}
-
 // ==================== 장비 강화 ====================
 function openEnhance() {
     showScreen('enhanceScreen');
@@ -1430,23 +1595,23 @@ function openEnhance() {
 }
 
 function enhanceItem(type) {
-    if (type === 'weapon' && player.ruby > 0 && player.weapon) {
-        player.ruby--;
-        player.weapon.atk += 3;
+    if (type === 'weapon' && player.ruby >= 5 && player.weapon) {
+        player.ruby -= 5;
+        player.weapon.atk += 5;
         player.weapon.enhance = (player.weapon.enhance || 0) + 1;
-        addLog(`✨ 무기 강화 성공! 공격력 +3`);
-    } else if (type === 'armor' && player.sapphire > 0 && player.armor) {
-        player.sapphire--;
-        player.armor.def += 3;
+        addLog(`✨ 무기 강화 성공! 공격력 +5`);
+    } else if (type === 'armor' && player.sapphire >= 5 && player.armor) {
+        player.sapphire -= 5;
+        player.armor.def += 5;
         player.armor.enhance = (player.armor.enhance || 0) + 1;
-        addLog(`✨ 방어구 강화 성공! 방어력 +3`);
-    } else if (type === 'accessory' && player.emerald > 0 && player.accessory) {
-        player.emerald--;
-        player.accessory.magicDef = (player.accessory.magicDef || 0) + 3;
+        addLog(`✨ 방어구 강화 성공! 방어력 +5`);
+    } else if (type === 'accessory' && player.emerald >= 5 && player.accessory) {
+        player.emerald -= 5;
+        player.accessory.magicDef = (player.accessory.magicDef || 0) + 5;
         player.accessory.enhance = (player.accessory.enhance || 0) + 1;
-        addLog(`✨ 악세서리 강화 성공! 마법방어 +3`);
+        addLog(`✨ 악세서리 강화 성공! 마법방어 +5`);
     } else {
-        alert('강화할 수 없습니다!');
+        alert('보석이 부족하거나 강화할 수 없습니다!');
         return;
     }
     playSound('victory');
@@ -1504,7 +1669,6 @@ function expandInventoryByStr() {
 function equipFromInventory(index) {
     const item = player.inventory[index];
     
-    // 이미 착용중인 장비 해제
     if (item.type === 'weapon' && player.weapon) {
         player.inventory.push({ ...player.weapon, sellPrice: player.weapon.sellPrice || 50 });
         player.weapon.equipped = false;
@@ -1516,7 +1680,6 @@ function equipFromInventory(index) {
         player.accessory.equipped = false;
     }
     
-    // 새 장비 착용
     if (item.type === 'weapon') {
         player.weapon = { ...item, equipped: true };
     } else if (item.type === 'armor') {
@@ -1560,7 +1723,6 @@ function showHuntingZones() {
         btn.textContent = `${zone.name} (Lv.${zone.minLv}~${zone.maxLv})`;
         btn.onclick = () => enterZone(key, false);
         
-        // 위험 경고 표시
         if (player.level < zone.minLv - 3) {
             btn.style.border = '2px solid red';
             btn.style.background = 'linear-gradient(135deg, #4a0000, #8b0000)';
@@ -1624,6 +1786,7 @@ function startBattle() {
     document.getElementById('battleMonsterName').textContent = `👾 ${currentMonster.name} (Lv.${currentMonster.level})`;
     updateBattleUI();
     addBattleLog(`⚔️ ${currentMonster.name}와(과) 전투 시작!`);
+    updateSkillBar();
 }
 
 function updateBattleUI() {
@@ -1657,7 +1820,6 @@ function battleAction(action) {
 
     if (action === 'attack') {
         let totalAtk = player.atk;
-        // 버프 체크
         player.activeBuffs = player.activeBuffs.filter(buff => {
             if (buff.type === 'atk' && buff.duration > 0) {
                 totalAtk += buff.value;
@@ -1678,10 +1840,6 @@ function battleAction(action) {
         }
         monsterAttack();
     }
-    else if (action === 'skill') {
-        showSkillMenu();
-        return;
-    }
     else if (action === 'potion') {
         if (player.hpPotions > 0) {
             player.hp = Math.min(player.maxHp, player.hp + 150);
@@ -1691,6 +1849,17 @@ function battleAction(action) {
             monsterAttack();
         } else {
             addBattleLog('❌ HP 포션이 부족합니다!');
+        }
+    }
+    else if (action === 'mpPotion') {
+        if (player.mpPotions > 0) {
+            player.mp = Math.min(player.maxMp, player.mp + 80);
+            player.mpPotions--;
+            addBattleLog('🧪 MP 포션을 사용했습니다.');
+            playSound('potion');
+            monsterAttack();
+        } else {
+            addBattleLog('❌ MP 포션이 부족합니다!');
         }
     }
     else if (action === 'run') {
@@ -1730,7 +1899,6 @@ function monsterAttack() {
         return;
     }
     
-    // 퀘스트 체크
     checkQuestProgress(currentMonster.name);
     
     updateBattleUI();
@@ -1759,12 +1927,11 @@ function winBattle() {
         player.level++;
         player.exp -= player.maxExp;
         player.maxExp = Math.floor(player.maxExp * 1.5);
-        player.statPoints += 3; // 레벨업당 3스탯 포인트
+        player.statPoints += 3;
         addLog(`✨ 레벨업! 현재 레벨 ${player.level}, 스탯 포인트 3 획득!`);
     }
     
-    // 아이템 드랍
-    if (currentZone.drops) {
+    if (currentZone.drops) { // 현재 지역의 드랍 아이템이 있다면
         currentZone.drops.forEach(drop => {
             if (Math.random() < drop.rate) {
                 const item = gameItems[drop.id];
@@ -1802,28 +1969,7 @@ function endBattle() {
     currentMonster = null;
 }
 
-function showSkillMenu() {
-    document.getElementById('skillMenu').style.display = 'block';
-    const skillList = document.getElementById('skillList');
-    skillList.innerHTML = '';
-    player.skills.forEach(skillId => {
-        const skill = skills[skillId];
-        if (!skill) return;
-        const btn = document.createElement('button');
-        btn.className = 'game-btn';
-        btn.style.width = 'auto';
-        btn.textContent = `${skill.name} (MP ${skill.mpCost})`;
-        btn.onclick = () => useSkill(skillId);
-        skillList.appendChild(btn);
-    });
-}
-
-function closeSkillMenu() {
-    document.getElementById('skillMenu').style.display = 'none';
-}
-
 function useSkill(skillId) {
-    closeSkillMenu();
     const skill = skills[skillId];
     if (player.mp < skill.mpCost) {
         addBattleLog('❌ MP가 부족합니다!');
@@ -1835,8 +1981,11 @@ function useSkill(skillId) {
     player.mp -= skill.mpCost;
     
     if (skill.heal) {
-        player.hp = Math.min(player.maxHp, player.hp + skill.heal);
-        addBattleLog(`✨ ${skill.name}! ${skill.heal} HP를 회복했다!`);
+        // 지능에 따라 힐량 증가 (지능 10당 50% 증가)
+        let healAmount = skill.heal;
+        healAmount += Math.floor(player.int * 5); // 지능 1당 힐량 +5
+        player.hp = Math.min(player.maxHp, player.hp + healAmount);
+        addBattleLog(`✨ ${skill.name}! ${healAmount} HP를 회복했다! (지능 ${player.int} 보너스)`);
         playSound('potion');
     } else if (skill.hits) {
         let totalDamage = 0;
@@ -1875,6 +2024,7 @@ function useSkill(skillId) {
         monsterAttack();
         updateBattleUI();
     }
+    updateSkillBar();
 }
 
 // ==================== 퀘스트 시스템 ====================
@@ -1979,14 +2129,74 @@ function guildUpgrade() {
     updateGuildUI();
 }
 
+// ==================== 도박장 ====================
+function openGambling() {
+    showScreen('gamblingScreen');
+    document.getElementById('betSlider').value = 1000; // 초기값 설정
+    document.getElementById('betAmount').textContent = 1000;
+    document.getElementById('gamblingResult').innerHTML = ''; // 결과 초기화
+    
+    // 버튼 스타일 초기화
+    document.querySelectorAll('.rsp-btn').forEach(btn => btn.classList.remove('selected'));
+}
+
+function playRSP(playerChoice) {
+    const bet = parseInt(document.getElementById('betSlider').value);
+    if (player.gold < bet) {
+        alert('골드가 부족합니다!');
+        return;
+    }
+    
+    // 선택된 버튼 스타일 적용
+    document.querySelectorAll('.rsp-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelector(`.rsp-btn[onclick="playRSP('${playerChoice}')"]`).classList.add('selected');
+
+    const choices = ['rock', 'paper', 'scissors'];
+    const computerChoice = choices[Math.floor(Math.random() * 3)];
+    const result = document.getElementById('gamblingResult');
+    
+    let isWin = false;
+    let isDraw = false;
+    
+    if (playerChoice === computerChoice) {
+        isDraw = true;
+    } else if (
+        (playerChoice === 'rock' && computerChoice === 'scissors') ||
+        (playerChoice === 'paper' && computerChoice === 'rock') ||
+        (playerChoice === 'scissors' && computerChoice === 'paper')
+    ) {
+        isWin = true;
+    }
+    
+    const choiceMap = { rock: '✊', paper: '✋', scissors: '✌️' };
+    
+    if (isDraw) {
+        player.gold -= Math.floor(bet / 2);
+        result.className = 'gambling-result draw';
+        result.innerHTML = `${choiceMap[playerChoice]} vs ${choiceMap[computerChoice]}<br>비겼습니다! ${Math.floor(bet / 2)}G를 잃었습니다.`;
+    } else if (isWin) {
+        player.gold += bet;
+        result.className = 'gambling-result win';
+        result.innerHTML = `${choiceMap[playerChoice]} vs ${choiceMap[computerChoice]}<br>승리! ${bet}G를 획득했습니다!`;
+        playSound('victory');
+    } else {
+        player.gold -= bet;
+        result.className = 'gambling-result lose';
+        result.innerHTML = `${choiceMap[playerChoice]} vs ${choiceMap[computerChoice]}<br>패배... ${bet}G를 잃었습니다.`;
+        playSound('attack');
+    }
+    
+    updateUI();
+}
+
 // ==================== 세이브/로드 ====================
 function saveGame() {
-    localStorage.setItem('rpgSaveV5', JSON.stringify(player));
+    localStorage.setItem('rpgSaveV6', JSON.stringify(player));
     alert('💾 게임이 저장되었습니다.');
 }
 
 function loadGame() {
-    const saved = localStorage.getItem('rpgSaveV5');
+    const saved = localStorage.getItem('rpgSaveV6');
     if (saved) {
         player = JSON.parse(saved);
         addLog('📂 저장된 게임을 불러왔습니다.');
@@ -1994,6 +2204,12 @@ function loadGame() {
         updateUI();
         updateGuildUI();
         updateShop();
+        
+        // 새로 추가된 UI 요소들의 초기화
+        document.getElementById('betSlider').value = 1000;
+        document.getElementById('betAmount').textContent = 1000;
+        document.getElementById('gamblingResult').innerHTML = '';
+        document.querySelectorAll('.rsp-btn').forEach(btn => btn.classList.remove('selected'));
     } else {
         alert('저장된 게임이 없습니다.');
     }
@@ -2017,12 +2233,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
     updateJobList();
     
-    // 초기 퀘스트
     player.quests = quests.map(q => ({ ...q, progress: 0 }));
-    
-    // 초기 아이템
     player.inventory.push({ ...gameItems.wolfLeather, id: 'wolfLeather', sellPrice: 5 });
     player.inventory.push({ ...gameItems.koboldLeather, id: 'koboldLeather', sellPrice: 6 });
+    
+    document.getElementById('betSlider').addEventListener('input', (e) => {
+        document.getElementById('betAmount').textContent = e.target.value;
+    });
 });
 </script>
 </body>
